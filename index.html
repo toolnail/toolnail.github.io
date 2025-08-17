@@ -89,7 +89,7 @@
 
     /* 章节内局部画布（叶子真正“融入”每个区块） */
     .section-leaves{
-      position:absolute; inset:0; z-index:0; pointer-events:none; display:block;
+      position:absolute; inset:0; z-index:-1; pointer-events:none; display:block;
       /* 让叶子与卡片底色自然融合 */
       mix-blend-mode: multiply; opacity:.85;
     }
@@ -378,7 +378,7 @@
         }
         reset(initial=false){
           const rect = this.field.host.getBoundingClientRect();
-          this.size = 12 + Math.random()*16;                         // 更小
+          this.size = 20 + Math.random()*16;                         // 更小
           this.x = Math.random()*rect.width;
           this.y = initial ? (Math.random()*rect.height*0.6) : (-this.size - Math.random()*40);
           this.vx = (Math.random()*0.3 - 0.15);                      // 更小水平速度
