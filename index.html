@@ -8,14 +8,29 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧑‍💻</text></svg>">
   <style>
     :root{
-      --bg:#ffffff; --fg:#0f172a; --sub:#475569; --muted:#e2e8f0; --card:#f8fafc; --link:#2563eb;
-      --accent:#0ea5e9; --shadow:0 8px 30px rgba(2,6,23,0.08);
+      --bg:#f7fff9; --fg:#0f172a; --sub:#475569; --muted:#e2f1e7; --card:#ffffff; --link:#16794a;
+      --accent:#16a34a; --shadow:0 8px 30px rgba(2,6,23,0.07);
+
+      /* 夏日配色（树叶/光标） */
+      --leaf-1:#22c55e; --leaf-2:#16a34a; --leaf-3:#10b981; --leaf-4:#34d399; --leaf-5:#65a30d; --leaf-6:#4d7c0f;
+      --branch:#8b5e3c;
+
+      /* 自定义光标 */
+      --cursor-dot:#16a34a;
+      --cursor-ring:#16a34a;
     }
     @media (prefers-color-scheme: dark){
-      :root{ --bg:#f5f5f5; --fg:#e5e7eb; --sub:#9ca3af; --muted:#1f2937; --card:#0f172a; --link:#60a5fa; --accent:#22d3ee; }
+      :root{
+        --bg:#0f172a; --fg:#e5e7eb; --sub:#9ca3af; --muted:#1f2937; --card:#101826; --link:#86efac; --accent:#22c55e;
+        --cursor-dot:#22c55e; --cursor-ring:#22c55e;
+      }
     }
+
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "PingFang SC", "Noto Sans CJK SC", "Microsoft Yahei", sans-serif}
+    html,body{
+      margin:0;padding:0;background:var(--bg);color:var(--fg);
+      font:16px/1.7 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Noto Sans CJK SC","Microsoft Yahei",sans-serif;
+    }
     a{color:var(--link);text-decoration:none}
     a:hover{text-decoration:underline}
     .container{max-width:1100px;margin:0 auto;padding:0 20px}
@@ -32,6 +47,7 @@
       .menu-btn{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--muted);padding:6px 10px;border-radius:10px;background:transparent;color:var(--fg)}
       #drawer{display:block}
     }
+
     /* Drawer */
     #drawer{display:none;position:fixed;inset:0;background:rgba(2,6,23,0.6);z-index:30}
     #drawer .panel{position:absolute;right:0;top:0;height:100%;width:78%;max-width:320px;background:var(--bg);padding:22px;border-left:1px solid var(--muted)}
@@ -40,8 +56,6 @@
 
     .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center;padding:42px 0}
     .hero-card{background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
-    .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .tag{font-size:12px;background:var(--muted);color:var(--fg);padding:4px 8px;border-radius:999px}
     .grid{display:grid;gap:20px}
     @media (min-width:901px){.grid-3{grid-template-columns:repeat(3,1fr)} }
     @media (max-width:900px){.hero{grid-template-columns:1fr} }
@@ -55,7 +69,7 @@
     .footer{padding:40px 0;border-top:1px solid var(--muted);font-size:14px;color:var(--sub)}
     .pill{display:inline-flex;align-items:center;gap:8px;background:var(--muted);padding:6px 10px;border-radius:999px}
     .right{margin-left:auto}
-    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;background:var(--muted);padding:2px 6px;border-radius:6px;font-size:12px}
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:var(--muted);padding:2px 6px;border-radius:6px;font-size:12px}
     .muted{color:var(--sub)}
     .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--muted);border-radius:10px;padding:8px 12px}
     .btn:hover{background:var(--muted)}
@@ -66,17 +80,46 @@
     .pub{display:grid;grid-template-columns:auto 1fr;gap:12px}
     .pub-badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--muted)}
 
-    /* 关键：确保内容层在画布之上，画布不遮挡文本 */
+    /* 关键：确保内容层在画布之上（落叶在下方） */
     main, footer { position: relative; z-index: 1; }
-    /* header 已有 z-index:20，保持最高层，避免被落叶遮挡 */
 
-    /* 画布基础样式：全屏、不可点击、在最底层内容下方 */
+    /* 背景画布：树冠 + 绿色落叶 */
     #leaves {
       position: fixed;
       inset: 0;
-      z-index: 0;            /* 低于 main/footer 的 1 和 header 的 20 */
-      pointer-events: none;  /* 不拦截点击 */
+      z-index: 0;            /* 低于 header(20) / 内容(1) */
+      pointer-events: none;  /* 不影响交互 */
       display: block;
+    }
+
+    /* 放大美化鼠标：隐藏系统箭头，使用点+环（更大） */
+    body { cursor: none; }
+    .cursor-dot, .cursor-ring {
+      position: fixed; top:0; left:0; transform: translate(-50%,-50%);
+      pointer-events: none; z-index: 1000;
+      will-change: transform, width, height, opacity;
+    }
+    .cursor-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--cursor-dot); opacity: .95;
+      box-shadow: 0 0 10px color-mix(in oklab, var(--cursor-dot) 60%, transparent);
+      transition: transform .12s ease, opacity .2s ease;
+    }
+    .cursor-ring {
+      width: 40px; height: 40px; border-radius: 50%;
+      box-shadow: 0 0 0 2px color-mix(in oklab, var(--cursor-ring) 80%, transparent);
+      background: color-mix(in oklab, var(--cursor-ring) 10%, transparent);
+      transition: transform .18s ease, opacity .25s ease;
+      filter: blur(.2px);
+    }
+    .cursor-hover .cursor-dot { transform: translate(-50%,-50%) scale(1.7); }
+    .cursor-hover .cursor-ring { transform: translate(-50%,-50%) scale(1.25); }
+
+    /* 无障碍：减少运动则关闭动画与自定义光标 */
+    @media (prefers-reduced-motion: reduce){
+      body { cursor: auto; }
+      .cursor-dot, .cursor-ring { display:none !important; }
+      #leaves { display:none !important; }
     }
   </style>
 
@@ -109,8 +152,11 @@
 </head>
 <body>
 
-  <!-- 全屏落叶画布（在所有内容之前注入，层级最低，不遮挡文字） -->
+  <!-- 背景画布（树冠 + 落叶） -->
   <canvas id="leaves" aria-hidden="true"></canvas>
+  <!-- 自定义鼠标（放大版） -->
+  <div class="cursor-ring" aria-hidden="true"></div>
+  <div class="cursor-dot" aria-hidden="true"></div>
 
   <header>
     <div class="container">
@@ -152,11 +198,6 @@
       <div class="hero-card">
         <h1 style="font-size:32px">Hello, I am <span style="color:var(--accent);font-weight:800">Ruxin Wang</span></h1>
         <p class="muted">I am currently pursuing a Ph.D. degree at Shanghai Jiao Tong University.</p>
-        <!--<div class="tags">
-          <span class="tag">5G / IAB</span>
-          <span class="tag">网络优化</span>
-          <span class="tag">MILP / CVX / Gurobi</span>
-        </div>-->
         <div class="wrap" style="margin-top:14px">
           <a class="btn" href="#pubs">New Paper</a>
           <a class="btn" href="files/CV.pdf"> Download CV</a>
@@ -177,7 +218,6 @@
       </div>
     </section>
 
-    <!-- 你的可选 News/Pubs/Projects/Posts/Contact 模块保持不变 -->
     <section id="projects">
       <div class="section-title"><h2>Project</h2><div class="line"></div></div>
       <div class="grid grid-3">
@@ -186,7 +226,6 @@
           <p class="muted">source code</p>
           <a class="btn" href="#">GitHub</a>
         </div>
-        <!-- 其他项目卡片略 -->
       </div>
     </section>
 
@@ -227,95 +266,208 @@
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ====== 落叶动画：在背景 Canvas 里运行，永不遮挡文字 ======
+    // ====== 背景：树冠 + 绿色落叶 ======
     (function(){
       const canvas = document.getElementById("leaves");
       const ctx = canvas.getContext("2d");
-      let W, H, DPR;
+      let DPR=1, W=0, H=0;
 
-      // 根据用户是否减少动画偏好，自动停用动画
       const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+      // 设备像素 & 尺寸
       function resize() {
         DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
         W = canvas.width = Math.floor(window.innerWidth * DPR);
         H = canvas.height = Math.floor(window.innerHeight * DPR);
         canvas.style.width = window.innerWidth + "px";
         canvas.style.height = window.innerHeight + "px";
-        ctx.setTransform(DPR, 0, 0, DPR, 0, 0); // 逻辑坐标按 CSS 像素绘制
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        buildCanopy(); // 尺寸变化时重绘树冠
       }
-      window.addEventListener("resize", resize, { passive: true });
+      window.addEventListener("resize", resize, { passive:true });
       resize();
 
-      const COLORS = ["#d97706","#b45309","#f59e0b","#92400e","#eab308"];
+      // ===== 树冠（离屏绘制成贴图，避免每帧重画）=====
+      let canopyCanvas = document.createElement('canvas');
+      let canopyCtx = canopyCanvas.getContext('2d');
+
+      function buildCanopy(){
+        canopyCanvas.width = W;
+        // 树冠高度（CSS 像素）
+        const canopyH = Math.max(140, Math.min(220, window.innerHeight*0.22)) * DPR;
+        canopyCanvas.height = canopyH;
+
+        const cctx = canopyCtx;
+        cctx.setTransform(1,0,0,1,0,0);
+        cctx.clearRect(0,0,canopyCanvas.width,canopyCanvas.height);
+
+        // 背景轻微渐变，让顶部更明亮
+        const g = cctx.createLinearGradient(0,0,0,canopyH);
+        g.addColorStop(0, "rgba(255,255,255,0.55)");
+        g.addColorStop(1, "rgba(255,255,255,0.0)");
+        cctx.fillStyle = g;
+        cctx.fillRect(0,0,canopyCanvas.width,canopyCanvas.height);
+
+        // 画几条树枝（棕色贝塞尔曲线）
+        cctx.lineWidth = 10 * DPR;
+        cctx.lineCap = "round";
+        cctx.strokeStyle = getCSS("--branch");
+        const branchCount = 6;
+        for(let i=0;i<branchCount;i++){
+          const x0 = (i/(branchCount-1)) * W + (Math.random()-0.5) * 80*DPR;
+          const y0 = canopyH * (0.85 + Math.random()*0.1);
+          const cp1x = x0 + (Math.random()-0.5) * 160*DPR;
+          const cp1y = y0 - 60*DPR - Math.random()*40*DPR;
+          const cp2x = x0 + (Math.random()-0.5) * 200*DPR;
+          const cp2y = y0 - 110*DPR - Math.random()*50*DPR;
+          const x1 = x0 + (Math.random()-0.5) * 260*DPR;
+          const y1 = y0 - 140*DPR - Math.random()*60*DPR;
+          cctx.beginPath();
+          cctx.moveTo(x0,y0);
+          cctx.bezierCurveTo(cp1x,cp1y, cp2x,cp2y, x1,y1);
+          cctx.stroke();
+        }
+
+        // 叶团（多个椭圆叠加，制造茂密效果）
+        const greens = [getCSS("--leaf-1"),getCSS("--leaf-2"),getCSS("--leaf-3"),getCSS("--leaf-4"),getCSS("--leaf-5"),getCSS("--leaf-6")];
+        const clusterCount = Math.max(10, Math.floor(window.innerWidth/120));
+        for(let i=0;i<clusterCount;i++){
+          const cx = (i/(clusterCount-1))*W + (Math.random()-0.5)*80*DPR;
+          const cy = canopyH*0.45 + (Math.random()-0.5)*30*DPR;
+          const leavesPerCluster = 10 + Math.floor(Math.random()*14);
+          for(let j=0;j<leavesPerCluster;j++){
+            const r = 18*DPR + Math.random()*28*DPR;
+            const ox = (Math.random()-0.5) * 80*DPR;
+            const oy = (Math.random()-0.5) * 40*DPR;
+            const ang = Math.random()*Math.PI*2;
+            cctx.save();
+            cctx.translate(cx+ox, cy+oy);
+            cctx.rotate(ang);
+            cctx.globalAlpha = 0.75 + Math.random()*0.25;
+            cctx.fillStyle = greens[(Math.random()*greens.length)|0];
+            cctx.beginPath();
+            cctx.ellipse(0,0,r*0.6,r,0,0,Math.PI*2);
+            cctx.fill();
+            cctx.restore();
+          }
+        }
+
+        // 边缘柔化阴影，让树冠更自然
+        const shade = cctx.createLinearGradient(0,canopyH-20*DPR,0,canopyH);
+        shade.addColorStop(0,"rgba(0,0,0,0.08)");
+        shade.addColorStop(1,"rgba(0,0,0,0.00)");
+        cctx.fillStyle = shade;
+        cctx.fillRect(0,canopyH-20*DPR,W,20*DPR);
+      }
+
+      function getCSS(varName){
+        return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || "#22c55e";
+      }
+
+      // ===== 绿色落叶（从树冠区域掉落）=====
+      const COLORS = ["--leaf-1","--leaf-2","--leaf-3","--leaf-4","--leaf-5","--leaf-6"].map(getCSS);
       const leaves = [];
-      const BASE_COUNT = 36; // 基础数量
-      const DENSITY = Math.max(1, Math.min(1.0, window.innerWidth / 1200)); // 宽度越大越多
+      const BASE_COUNT = 38; // 基础数量
+      const DENSITY = Math.max(1, Math.min(1.0, window.innerWidth / 1200));
       const leafCount = Math.floor(BASE_COUNT * DENSITY);
 
       class Leaf {
-        constructor() { this.reset(true); }
-        reset(initial=false) {
-          this.size = 16 + Math.random()*18;
-          // 初始散布到全屏或顶部
+        constructor(init=false){ this.reset(init); }
+        reset(initial=false){
+          this.size = 18 + Math.random()*22;
           this.x = Math.random()*window.innerWidth;
-          this.y = initial ? Math.random()*window.innerHeight : -this.size - Math.random()*window.innerHeight*0.2;
-
-          this.speedY = 0.6 + Math.random()*1.6;
-          this.swing = 1.2 + Math.random()*2.0;
+          // 出生在树冠底部附近（含轻微上方）
+          this.y = initial ? Math.random()* (window.innerHeight*0.5) : (Math.random()*40 - 60);
+          this.speedY = 0.7 + Math.random()*1.5;
+          this.swing = 1.0 + Math.random()*1.8;
           this.baseAngle = Math.random()*Math.PI*2;
           this.angle = Math.random()*Math.PI*2;
           this.angularSpeed = (Math.random()*0.02 - 0.01);
           this.color = COLORS[(Math.random()*COLORS.length)|0];
-          this.skew = 0.3 + Math.random()*0.7; // 叶形偏心
-          this.alpha = 0.9; // 透明度略低，避免压背景
+          this.alpha = 0.92;
         }
-        update(t) {
+        update(t){
           this.y += this.speedY;
           this.angle += this.angularSpeed;
-          this.x += Math.sin(t*0.001 + this.baseAngle) * this.swing * 0.6;
-          if (this.y > window.innerHeight + this.size*1.2) this.reset(false);
+          this.x += Math.sin(t*0.0012 + this.baseAngle) * this.swing * 0.8;
+          if(this.y > window.innerHeight + this.size*1.2) this.reset(false);
         }
-        draw(ctx) {
-          ctx.save();
-          ctx.globalAlpha = this.alpha;
-          ctx.translate(this.x, this.y);
-          ctx.rotate(this.angle);
-          ctx.fillStyle = this.color;
-          ctx.beginPath();
-          // 用椭圆模拟叶子
-          ctx.ellipse(0, 0, this.size*0.55, this.size, 0, 0, Math.PI*2);
-          ctx.fill();
-          // 轻微叶脉（可选，很淡）
-          ctx.globalAlpha = this.alpha * 0.15;
-          ctx.strokeStyle = "#000";
-          ctx.beginPath();
-          ctx.moveTo(0, -this.size);
-          ctx.lineTo(0, this.size);
-          ctx.stroke();
-          ctx.restore();
+        draw(g){
+          g.save();
+          g.globalAlpha = this.alpha;
+          g.translate(this.x, this.y);
+          g.rotate(this.angle);
+          g.fillStyle = this.color;
+          // 叶片：椭圆 + 轻微叶脉
+          g.beginPath();
+          g.ellipse(0,0,this.size*0.55,this.size,0,0,Math.PI*2);
+          g.fill();
+          g.globalAlpha = this.alpha*0.12;
+          g.strokeStyle = "#000";
+          g.beginPath();
+          g.moveTo(0,-this.size);
+          g.lineTo(0,this.size);
+          g.stroke();
+          g.restore();
         }
       }
+      for(let i=0;i<leafCount;i++) leaves.push(new Leaf(true));
 
-      for (let i=0;i<leafCount;i++) leaves.push(new Leaf());
-
-      let rafId = null;
+      let rafId=null;
       function animate(t){
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        for (const leaf of leaves){
-          leaf.update(t||0);
-          leaf.draw(ctx);
-        }
+        ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+        // 先画树冠（固定贴图）
+        ctx.drawImage(canopyCanvas,0,0, canop yCanvas.width/DPR, canopyCanvas.height/DPR);
+        // 再画落叶
+        for(const lf of leaves){ lf.update(t||0); lf.draw(ctx); }
         rafId = requestAnimationFrame(animate);
       }
 
-      if (!reduceMotion){
+      if(!reduceMotion){
         animate(0);
         document.addEventListener("visibilitychange", ()=>{
-          if (document.hidden){ if (rafId) cancelAnimationFrame(rafId); rafId=null; }
-          else if (!rafId){ rafId=requestAnimationFrame(animate); }
+          if(document.hidden){ if(rafId) cancelAnimationFrame(rafId), rafId=null; }
+          else if(!rafId){ rafId=requestAnimationFrame(animate); }
         });
       }
+    })();
+
+    // ====== 自定义鼠标（放大 + 环，交互放大）======
+    (function(){
+      const dot = document.querySelector('.cursor-dot');
+      const ring = document.querySelector('.cursor-ring');
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion || !dot || !ring) return;
+
+      let x = window.innerWidth/2, y = window.innerHeight/2;
+      let rx = x, ry = y; // ring 慢跟随
+      let rafId=null;
+
+      function onMove(e){
+        x = e.clientX; y = e.clientY;
+        dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+      }
+      window.addEventListener('mousemove', onMove, { passive:true });
+      function loop(){
+        rx += (x - rx) * 0.2;
+        ry += (y - ry) * 0.2;
+        ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+        rafId = requestAnimationFrame(loop);
+      }
+      loop();
+
+      const hoverables = ['a','button','[role="button"]','.btn','input','select','textarea','summary','label'];
+      document.addEventListener('mouseover', (e)=>{
+        if (hoverables.some(sel => e.target.closest(sel))) document.body.classList.add('cursor-hover');
+      });
+      document.addEventListener('mouseout', (e)=>{
+        if (hoverables.some(sel => e.target.closest(sel))) document.body.classList.remove('cursor-hover');
+      });
+
+      document.addEventListener('visibilitychange', ()=>{
+        if(document.hidden && rafId){ cancelAnimationFrame(rafId); rafId=null; }
+        else if(!rafId){ rafId=requestAnimationFrame(loop); }
+      });
     })();
   </script>
 </body>
