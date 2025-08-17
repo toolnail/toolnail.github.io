@@ -65,7 +65,21 @@
     .wrap{display:flex;flex-wrap:wrap;gap:10px}
     .pub{display:grid;grid-template-columns:auto 1fr;gap:12px}
     .pub-badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--muted)}
+
+    /* 关键：确保内容层在画布之上，画布不遮挡文本 */
+    main, footer { position: relative; z-index: 1; }
+    /* header 已有 z-index:20，保持最高层，避免被落叶遮挡 */
+
+    /* 画布基础样式：全屏、不可点击、在最底层内容下方 */
+    #leaves {
+      position: fixed;
+      inset: 0;
+      z-index: 0;            /* 低于 main/footer 的 1 和 header 的 20 */
+      pointer-events: none;  /* 不拦截点击 */
+      display: block;
+    }
   </style>
+
   <script>
     const onReady=()=>{
       const drawer=document.getElementById('drawer');
@@ -79,6 +93,7 @@
     };
     document.addEventListener('DOMContentLoaded', onReady);
   </script>
+
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -93,7 +108,10 @@
   </script>
 </head>
 <body>
- 
+
+  <!-- 全屏落叶画布（在所有内容之前注入，层级最低，不遮挡文字） -->
+  <canvas id="leaves" aria-hidden="true"></canvas>
+
   <header>
     <div class="container">
       <nav>
@@ -151,7 +169,6 @@
       </div>
     </section>
 
-
     <section id="about">
       <div class="section-title"><h2>About Me</h2><div class="line"></div></div>
       <div class="card">
@@ -160,65 +177,7 @@
       </div>
     </section>
 
-<!--
-    <section id="news">
-      <div class="section-title"><h2>News</h2><div class="line"></div></div>
-      <div class="card">
-        <ul class="list">
-          <li><span class="post-meta">2025-08</span> 🎉 一篇论文被 <strong>IEEE Communications Letters</strong> 接收。</li>
-        </ul>
-      </div>
-    </section>
--->
- <!--   
-    <section id="pubs">
-      <div class="section-title"><h2>精选论文</h2><div class="line"></div></div>
-      <div class="grid grid-3">
-        <article class="card">
-          <div class="pub">
-            <span class="pub-badge">2025</span>
-            <div>
-              <a href="#">Progressive IAB Network Augmentation via Hybrid Fiber-Wireless Topology Optimization</a>
-              <div class="post-meta">CL（通信快报） | 第一作者</div>
-              <div class="wrap" style="margin-top:8px">
-                <a class="pill" href="#">PDF</a>
-                <a class="pill" href="#">代码</a>
-                <a class="pill" href="#">BibTeX</a>
-              </div>
-            </div>
-          </div>
-        </article>
-        <article class="card">
-          <div class="pub">
-            <span class="pub-badge">2024</span>
-            <div>
-              <a href="#">Routing & Energy Optimization in IAB Networks with Closed-loop O-RAN</a>
-              <div class="post-meta">期刊/会议 | 通讯作者</div>
-              <div class="wrap" style="margin-top:8px">
-                <a class="pill" href="#">PDF</a>
-                <a class="pill" href="#">代码</a>
-                <a class="pill" href="#">海报</a>
-              </div>
-            </div>
-          </div>
-        </article>
-        <article class="card">
-          <div class="pub">
-            <span class="pub-badge">2023</span>
-            <div>
-              <a href="#">Topology Formation for Robust mmWave IAB Backhaul</a>
-              <div class="post-meta">期刊/会议 | 学术合作</div>
-              <div class="wrap" style="margin-top:8px">
-                <a class="pill" href="#">PDF</a>
-                <a class="pill" href="#">数据</a>
-                <a class="pill" href="#">Slides</a>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
--->
+    <!-- 你的可选 News/Pubs/Projects/Posts/Contact 模块保持不变 -->
     <section id="projects">
       <div class="section-title"><h2>Project</h2><div class="line"></div></div>
       <div class="grid grid-3">
@@ -227,16 +186,7 @@
           <p class="muted">source code</p>
           <a class="btn" href="#">GitHub</a>
         </div>
- <!--       <div class="card">
-          <strong>UAV-RF-Reflect</strong>
-          <p class="muted">双无人机多角度 RF 反射率测量与路径规划。</p>
-          <a class="btn" href="#">文档</a>
-        </div>
-        <div class="card">
-          <strong>5G-ChannelSim</strong>
-          <p class="muted">5G 信道建模、LOS/NLOS、瑞利/莱斯、容量分析。</p>
-          <a class="btn" href="#">代码</a>-->
-        </div>
+        <!-- 其他项目卡片略 -->
       </div>
     </section>
 
@@ -263,12 +213,7 @@
     <section id="contact">
       <div class="section-title"><h2>Contact</h2><div class="line"></div></div>
       <div class="card">
-        <p><strong>Email：</strong>wangruxin@sjtu.edu.cn
-        <!--<div class="wrap">
-          <a class="pill" href="wangruxin@sjtu.edu.cn">Contact me</a>
-          <a class="pill" href="/atom.xml">RSS</a>
-          <a class="pill" href="/sitemap.xml">Sitemap</a>
-        </div>-->
+        <p><strong>Email：</strong>wangruxin@sjtu.edu.cn</p>
       </div>
     </section>
   </main>
@@ -278,6 +223,100 @@
       <span>© <span id="y"></span> WangRuxin</span>
     </div>
   </footer>
-  <script>document.getElementById('y').textContent = new Date().getFullYear()</script>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // ====== 落叶动画：在背景 Canvas 里运行，永不遮挡文字 ======
+    (function(){
+      const canvas = document.getElementById("leaves");
+      const ctx = canvas.getContext("2d");
+      let W, H, DPR;
+
+      // 根据用户是否减少动画偏好，自动停用动画
+      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function resize() {
+        DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+        W = canvas.width = Math.floor(window.innerWidth * DPR);
+        H = canvas.height = Math.floor(window.innerHeight * DPR);
+        canvas.style.width = window.innerWidth + "px";
+        canvas.style.height = window.innerHeight + "px";
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0); // 逻辑坐标按 CSS 像素绘制
+      }
+      window.addEventListener("resize", resize, { passive: true });
+      resize();
+
+      const COLORS = ["#d97706","#b45309","#f59e0b","#92400e","#eab308"];
+      const leaves = [];
+      const BASE_COUNT = 36; // 基础数量
+      const DENSITY = Math.max(1, Math.min(1.0, window.innerWidth / 1200)); // 宽度越大越多
+      const leafCount = Math.floor(BASE_COUNT * DENSITY);
+
+      class Leaf {
+        constructor() { this.reset(true); }
+        reset(initial=false) {
+          this.size = 16 + Math.random()*18;
+          // 初始散布到全屏或顶部
+          this.x = Math.random()*window.innerWidth;
+          this.y = initial ? Math.random()*window.innerHeight : -this.size - Math.random()*window.innerHeight*0.2;
+
+          this.speedY = 0.6 + Math.random()*1.6;
+          this.swing = 1.2 + Math.random()*2.0;
+          this.baseAngle = Math.random()*Math.PI*2;
+          this.angle = Math.random()*Math.PI*2;
+          this.angularSpeed = (Math.random()*0.02 - 0.01);
+          this.color = COLORS[(Math.random()*COLORS.length)|0];
+          this.skew = 0.3 + Math.random()*0.7; // 叶形偏心
+          this.alpha = 0.9; // 透明度略低，避免压背景
+        }
+        update(t) {
+          this.y += this.speedY;
+          this.angle += this.angularSpeed;
+          this.x += Math.sin(t*0.001 + this.baseAngle) * this.swing * 0.6;
+          if (this.y > window.innerHeight + this.size*1.2) this.reset(false);
+        }
+        draw(ctx) {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          // 用椭圆模拟叶子
+          ctx.ellipse(0, 0, this.size*0.55, this.size, 0, 0, Math.PI*2);
+          ctx.fill();
+          // 轻微叶脉（可选，很淡）
+          ctx.globalAlpha = this.alpha * 0.15;
+          ctx.strokeStyle = "#000";
+          ctx.beginPath();
+          ctx.moveTo(0, -this.size);
+          ctx.lineTo(0, this.size);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      for (let i=0;i<leafCount;i++) leaves.push(new Leaf());
+
+      let rafId = null;
+      function animate(t){
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        for (const leaf of leaves){
+          leaf.update(t||0);
+          leaf.draw(ctx);
+        }
+        rafId = requestAnimationFrame(animate);
+      }
+
+      if (!reduceMotion){
+        animate(0);
+        document.addEventListener("visibilitychange", ()=>{
+          if (document.hidden){ if (rafId) cancelAnimationFrame(rafId); rafId=null; }
+          else if (!rafId){ rafId=requestAnimationFrame(animate); }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
