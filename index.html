@@ -11,26 +11,31 @@
       --bg:#ffffff; --fg:#0f172a; --sub:#475569; --muted:#e2e8f0; --card:#f8fafc; --link:#2563eb;
       --accent:#0ea5e9; --shadow:0 8px 30px rgba(2,6,23,0.08);
 
-      /* 叶子与树冠色系（夏日） */
+      /* 夏日绿叶 + 树干 */
       --leaf1:#22c55e; --leaf2:#16a34a; --leaf3:#10b981; --leaf4:#34d399; --leaf5:#65a30d; --leaf6:#4d7c0f;
-      --branch:#8b5e3c;
-      --canopyLight:#b7f0c0; --canopyMedium:#7cd67f; --canopyDeep:#4caf50;
+      --trunkDark:#6e4a2f; --trunkMid:#8b5e3c; --trunkLight:#b98557;
 
-      /* 自定义光标颜色 */
-      --cursor-dot:#16a34a; 
-      --cursor-ring:#16a34a;
+      /* 侧边树叶色（淡淡几团，窄屏隐藏） */
+      --treeLight:#b9f3c5; --treeMid:#7fd785; --treeDeep:#4caf50;
+
+      /* 绿色自定义光标 */
+      --cursor-dot:#16a34a; --cursor-ring:#16a34a;
     }
     @media (prefers-color-scheme: dark){
       :root{
         --bg:#0f172a; --fg:#e5e7eb; --sub:#9ca3af; --muted:#1f2937; --card:#111827; --link:#86efac; --accent:#22c55e;
         --cursor-dot:#22c55e; --cursor-ring:#22c55e;
-        --canopyLight:#1d3a27; --canopyMedium:#285f3a; --canopyDeep:#2f6f43; --branch:#6b4b32;
+        --treeLight:#1b3a26; --treeMid:#255e39; --treeDeep:#2e6f43;
+        --trunkDark:#5a3d28; --trunkMid:#704a30; --trunkLight:#8b5e3c;
       }
     }
+
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Noto Sans CJK SC","Microsoft Yahei",sans-serif}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+      font:16px/1.7 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"PingFang SC","Noto Sans CJK SC","Microsoft Yahei",sans-serif}
     a{color:var(--link);text-decoration:none}
     a:hover{text-decoration:underline}
+
     .container{max-width:1100px;margin:0 auto;padding:0 20px}
     header{position:sticky;top:0;z-index:20;background:color-mix(in oklab, var(--bg) 85%, transparent);backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--muted)}
     nav{display:flex;align-items:center;justify-content:space-between;height:64px}
@@ -52,14 +57,14 @@
     #drawer a:hover{background:var(--muted)}
 
     .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center;padding:42px 0}
-    .hero-card{background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+    .hero-card{position:relative; /* 使章节内画布可定位 */ background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:22px;box-shadow:var(--shadow);overflow:hidden}
     .grid{display:grid;gap:20px}
     @media (min-width:901px){.grid-3{grid-template-columns:repeat(3,1fr)} }
     @media (max-width:900px){.hero{grid-template-columns:1fr} }
-    section{padding:28px 0}
+    section{padding:28px 0; position:relative}
     h1,h2{line-height:1.2;margin:0}
     h2{font-size:26px;margin-bottom:10px}
-    .card{background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+    .card{position:relative; background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:18px;box-shadow:var(--shadow);overflow:hidden}
     .list{list-style:none;margin:0;padding:0}
     .list li{padding:10px 0;border-bottom:1px dashed var(--muted)}
     .list li:last-child{border-bottom:none}
@@ -77,30 +82,56 @@
     .pub{display:grid;grid-template-columns:auto 1fr;gap:12px}
     .pub-badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--muted)}
 
-    /* 保证内容在画布上层 */
+    /* 层次：主内容 1；章节内画布 0（在内容背景）；前景猫 3；头部 20 */
     main, footer { position: relative; z-index: 1; }
+    /* 背景树干（少量） */
+    #bgcanvas { position: fixed; inset: 0; z-index: 0; pointer-events:none; display:block; }
 
-    /* 背景画布 */
-    #leaves {
-      position: fixed; inset: 0; z-index: 0;
-      pointer-events: none; display: block;
+    /* 章节内局部画布（叶子真正“融入”每个区块） */
+    .section-leaves{
+      position:absolute; inset:0; z-index:0; pointer-events:none; display:block;
+      /* 让叶子与卡片底色自然融合 */
+      mix-blend-mode: multiply; opacity:.85;
     }
 
-    /* 自定义光标（默认显示系统光标；当 body 上有 .use-custom-cursor 才隐藏） */
+    /* 前景画布：小橘猫在内容之上 */
+    #fgcanvas { position: fixed; inset: 0; z-index: 3; pointer-events:none; display:block; }
+
+    /* 绿色自定义光标（仅初始化成功后隐藏系统光标） */
     body.use-custom-cursor{ cursor: none; }
-    .cursor-dot, .cursor-ring {
+    .cursor-dot, .cursor-ring{
       position: fixed; top:0; left:0; transform: translate(-50%,-50%);
-      pointer-events: none; z-index: 1000; will-change: transform, width, height, opacity;
+      pointer-events:none; z-index:1000; will-change: transform, opacity, width, height;
     }
-    /* 放大版光标 */
-    .cursor-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--cursor-dot); opacity: .95; transition: transform .15s ease, opacity .2s ease; }
-    .cursor-ring { width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 0 0 2px color-mix(in oklab, var(--cursor-ring) 80%, transparent); background: color-mix(in oklab, var(--cursor-ring) 8%, transparent); transition: transform .2s ease, opacity .25s ease; }
-    /* 悬停放大 */
+    .cursor-dot{
+      width:12px; height:12px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #7fffb1 0%, var(--cursor-dot) 60%, #0e8240 100%);
+      box-shadow: 0 0 8px rgba(34,197,94,.6), 0 0 18px rgba(34,197,94,.35);
+      transition: transform .15s ease, opacity .2s ease;
+    }
+    .cursor-ring{
+      width:48px; height:48px; border-radius:50%;
+      box-shadow: 0 0 0 2px rgba(34,197,94,.9), inset 0 0 30px rgba(34,197,94,.15);
+      background: radial-gradient(circle, rgba(34,197,94,.12), rgba(34,197,94,.06) 60%, transparent 70%);
+      transition: transform .2s ease, opacity .25s ease;
+    }
     .cursor-hover .cursor-dot { transform: translate(-50%,-50%) scale(1.6); }
     .cursor-hover .cursor-ring { transform: translate(-50%,-50%) scale(1.25); }
+    .cursor-pulse .cursor-ring { animation: pulse .35s ease-out 1; }
+    @keyframes pulse{
+      0%{ transform: translate(-50%,-50%) scale(1); box-shadow: 0 0 0 2px rgba(34,197,94,.9), inset 0 0 0 rgba(34,197,94,.2); }
+      100%{ transform: translate(-50%,-50%) scale(1.6); box-shadow: 0 0 0 0 rgba(34,197,94,0), inset 0 0 60px rgba(34,197,94,.25); }
+    }
+
+    /* 猫靠近页面元素时的融合效果 */
+    .cat-near{
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 26px rgba(0,0,0,.08), 0 0 0 2px rgba(34,197,94,.18);
+      transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+    }
 
     @media (prefers-reduced-motion: reduce){
-      #leaves{ display:none !important; }
+      #bgcanvas,#fgcanvas,.section-leaves{ display:none !important; }
       .cursor-dot,.cursor-ring{ display:none !important; }
       body{ cursor:auto !important; }
     }
@@ -108,9 +139,12 @@
 </head>
 <body>
 
-  <!-- 背景画布：树冠 + 落叶 -->
-  <canvas id="leaves" aria-hidden="true"></canvas>
-  <!-- 自定义光标（点 + 环） -->
+  <!-- 背景树干（轻量） -->
+  <canvas id="bgcanvas" aria-hidden="true"></canvas>
+  <!-- 前景小橘猫 -->
+  <canvas id="fgcanvas" aria-hidden="true"></canvas>
+
+  <!-- 自定义光标 -->
   <div class="cursor-ring" aria-hidden="true"></div>
   <div class="cursor-dot" aria-hidden="true"></div>
 
@@ -140,18 +174,18 @@
         <strong>导航</strong>
         <button id="close" class="btn">关闭</button>
       </div>
-          <a href="#about">About</a>
-          <a href="#news">News</a>
-          <a href="#pubs">Publications</a>
-          <a href="#projects">Projects</a>
-          <a href="#posts">Blog</a>
-          <a href="#contact">Contact</a>
+      <a href="#about">About</a>
+      <a href="#news">News</a>
+      <a href="#pubs">Publications</a>
+      <a href="#projects">Projects</a>
+      <a href="#posts">Blog</a>
+      <a href="#contact">Contact</a>
     </div>
   </div>
 
   <main class="container">
-    <section class="hero">
-      <div class="hero-card">
+    <section class="hero" data-leaves="true">
+      <div class="hero-card" data-leaves="true">
         <h1 style="font-size:32px">Hello, I am <span style="color:var(--accent);font-weight:800">Ruxin Wang</span></h1>
         <p class="muted">I am currently pursuing a Ph.D. degree at Shanghai Jiao Tong University.</p>
         <div class="wrap" style="margin-top:14px">
@@ -161,23 +195,23 @@
           <a class="btn" href="https://github.com/toolnail" target="_blank" rel="noreferrer">GitHub</a>
         </div>
       </div>
-      <div class="hero-card">
+      <div class="hero-card" data-leaves="true">
         <img src="https://toolnail.github.io/personal_photo.jpg" alt="cover" style="width:100%;height:auto;border-radius:12px;margin-top:8px;border:1px solid var(--muted)"/>
       </div>
     </section>
 
-    <section id="about">
+    <section id="about" data-leaves="true">
       <div class="section-title"><h2>About Me</h2><div class="line"></div></div>
-      <div class="card">
-        <p>I am currently pursuing a Ph.D. degree at Shanghai Jiao Tong University (SJTU). 
-           Prior to that, I received the B.Eng. degree in Telecommunication Engineering from Xidian University (XDU) in 2025. </p>
+      <div class="card" data-leaves="true">
+        <p>I am currently pursuing a Ph.D. degree at Shanghai Jiao Tong University (SJTU).
+           Prior to that, I received the B.Eng. degree in Telecommunication Engineering from Xidian University (XDU) in 2025.</p>
       </div>
     </section>
 
-    <section id="projects">
+    <section id="projects" data-leaves="true">
       <div class="section-title"><h2>Project</h2><div class="line"></div></div>
       <div class="grid grid-3">
-        <div class="card">
+        <div class="card" data-leaves="true">
           <strong>Progressive Integrated Access and Backhaul Network Augmentation</strong>
           <p class="muted">source code</p>
           <a class="btn" href="#">GitHub</a>
@@ -185,9 +219,9 @@
       </div>
     </section>
 
-    <section id="posts">
+    <section id="posts" data-leaves="true">
       <div class="section-title"><h2>Blog</h2><div class="line"></div></div>
-      <div class="card">
+      <div class="card" data-leaves="true">
         <ul class="list">
           <li>
             <a href="#">使用 McCormick 线性化处理二元×连续乘积</a>
@@ -205,9 +239,9 @@
       </div>
     </section>
 
-    <section id="contact">
+    <section id="contact" data-leaves="true">
       <div class="section-title"><h2>Contact</h2><div class="line"></div></div>
-      <div class="card">
+      <div class="card" data-leaves="true">
         <p><strong>Email：</strong>wangruxin@sjtu.edu.cn</p>
       </div>
     </section>
@@ -220,192 +254,392 @@
   </footer>
 
   <script>
-    // 年份
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // ===== 背景：树冠 + 绿色落叶 =====
-    (function(){
-      const canvas = document.getElementById("leaves");
-      const ctx = canvas.getContext("2d");
-      let W, H, DPR;
-
-      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      function resize() {
-        DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-        W = canvas.width = Math.floor(window.innerWidth * DPR);
-        H = canvas.height = Math.floor(window.innerHeight * DPR);
-        canvas.style.width = window.innerWidth + "px";
-        canvas.style.height = window.innerHeight + "px";
-        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    // ============ 小工具 ============
+    function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+    function setupCanvas(canvas){
+      const ctx = canvas.getContext('2d');
+      function resize(){
+        const DPR = Math.max(1, Math.min(window.devicePixelRatio||1, 2));
+        const rect = canvas.getBoundingClientRect();
+        canvas.width  = Math.floor(rect.width * DPR);
+        canvas.height = Math.floor(rect.height * DPR);
+        ctx.setTransform(DPR,0,0,DPR,0,0);
       }
-      window.addEventListener("resize", resize, { passive: true });
+      const ro = new ResizeObserver(resize); ro.observe(canvas);
+      resize();
+      return ctx;
+    }
+
+    // ============ 背景树干（轻量） ============
+    (function(){
+      const bg = document.getElementById('bgcanvas');
+      const ctx = bg.getContext('2d');
+      function resize(){
+        const DPR = Math.max(1, Math.min(window.devicePixelRatio||1, 2));
+        bg.width  = Math.floor(window.innerWidth * DPR);
+        bg.height = Math.floor(window.innerHeight * DPR);
+        bg.style.width = window.innerWidth + 'px';
+        bg.style.height = window.innerHeight + 'px';
+        ctx.setTransform(DPR,0,0,DPR,0,0);
+      }
+      window.addEventListener('resize', resize, {passive:true});
       resize();
 
-      // 画顶部树冠（多层圆形/云朵状叠加 + 棕色树枝）
-      function drawCanopy(){
-        const grad = ctx.createLinearGradient(0,0,0,160);
-        grad.addColorStop(0, getCSS('--canopyLight'));
-        grad.addColorStop(0.6, getCSS('--canopyMedium'));
-        grad.addColorStop(1, getCSS('--canopyDeep'));
-        ctx.save();
-        // 树冠底色
-        ctx.fillStyle = grad;
-        blob( -100,  -40, 400, 140, 0.6);
-        blob(  220,  -50, 420, 150, 0.7);
-        blob(  600,  -20, 460, 160, 0.6);
-        blob(  980,  -35, 400, 150, 0.65);
-        blob( 1350,  -30, 420, 150, 0.6);
-        // 棕色树枝（简洁几条）
-        ctx.strokeStyle = getCSS('--branch');
-        ctx.lineWidth = 6;
-        ctx.lineCap = 'round';
-        branch(140,90, 40,-30);
-        branch(420,85, -50,-40);
-        branch(760,95, 60,-35);
-        branch(1080,85, -60,-30);
-        ctx.restore();
+      const TREE_SIDE_MAX_W = 180;
+      function drawTrunk({x, baseY, trunkW, height, side}){
+        const g = ctx.createLinearGradient(x, baseY-height, x, baseY);
+        g.addColorStop(0, css('--trunkLight')); g.addColorStop(0.5, css('--trunkMid')); g.addColorStop(1, css('--trunkDark'));
+        ctx.save(); ctx.fillStyle = g; ctx.beginPath();
+        const topX = x + (side==='left' ? -trunkW*0.25 : trunkW*0.25), topW = trunkW*0.5;
+        ctx.moveTo(x - trunkW*0.5, baseY);
+        ctx.quadraticCurveTo(x - trunkW*0.45, baseY - height*0.5, topX - topW*0.5, baseY - height);
+        ctx.lineTo(topX + topW*0.5, baseY - height);
+        ctx.quadraticCurveTo(x + trunkW*0.45, baseY - height*0.5, x + trunkW*0.5, baseY);
+        ctx.closePath(); ctx.fill(); ctx.restore();
       }
-      function blob(cx, cy, w, h, jitter=0.6){
-        ctx.beginPath();
-        const seg = 8;
-        for(let i=0;i<=seg;i++){
-          const t = i/seg*Math.PI*2;
-          const jw = 1 + (Math.random()*2-1)*jitter*0.12;
-          const jh = 1 + (Math.random()*2-1)*jitter*0.12;
-          const x = cx + Math.cos(t)*w*jw;
-          const y = cy + Math.sin(t)*h*jh;
-          i?ctx.lineTo(x,y):ctx.moveTo(x,y);
+      function drawSideFoliage(sideW){
+        const L2 = css('--treeMid'), L3 = css('--treeDeep');
+        const drawCluster = (cx, cy, r, alpha, color)=>{
+          ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath();
+          for(let i=0;i<7;i++){ const t=(i/7)*Math.PI*2; ctx.ellipse(cx + Math.cos(t)*r*0.9, cy + Math.sin(t)*r*0.7, r*0.65, r, 0, 0, Math.PI*2); }
+          ctx.fill(); ctx.restore();
+        };
+        const h = Math.min(0.98*window.innerHeight, 760);
+        drawCluster(sideW*0.45, window.innerHeight - h + 80, sideW*0.8, 0.20, L3);
+        drawCluster(sideW*0.55, window.innerHeight - h + 140, sideW*0.7, 0.14, L2);
+        drawCluster(window.innerWidth - sideW*0.45, window.innerHeight - h + 100, sideW*0.8, 0.20, L3);
+        drawCluster(window.innerWidth - sideW*0.55, window.innerHeight - h + 160, sideW*0.7, 0.14, L2);
+      }
+      function draw(){
+        ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+        const vw = window.innerWidth;
+        const sideW = Math.min(TREE_SIDE_MAX_W, Math.max(110, vw*0.12));
+        if (vw >= 760){
+          const height = Math.min(0.98*window.innerHeight, 760);
+          const baseY  = window.innerHeight + 60;
+          drawTrunk({x: sideW*0.55, baseY, trunkW: sideW*0.38, height, side:'left'});
+          drawTrunk({x: window.innerWidth - sideW*0.55, baseY, trunkW: sideW*0.38, height, side:'right'});
+          drawSideFoliage(sideW);
         }
-        ctx.closePath();
-        ctx.fill();
+        requestAnimationFrame(draw);
       }
-      function branch(x,y, dx,dy){
-        ctx.beginPath();
-        ctx.moveTo(x,y);
-        ctx.quadraticCurveTo(x+dx*0.6, y+dy*0.6, x+dx, y+dy);
-        ctx.stroke();
-        // 小分叉
-        ctx.beginPath();
-        ctx.moveTo(x+dx*0.55, y+dy*0.55);
-        ctx.quadraticCurveTo(x+dx*0.8, y+dy*0.2, x+dx*0.95, y+dy*0.05);
-        ctx.stroke();
-      }
-      function getCSS(varName){
-        return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+      draw();
+    })();
+
+    // ============ 章节内“局部叶子场” （真正与内容融合） ============
+    (function(){
+      const COLORS = [css('--leaf1'),css('--leaf2'),css('--leaf3'),css('--leaf4'),css('--leaf5'),css('--leaf6')];
+
+      class SectionLeaves {
+        constructor(host){
+          this.host = host; // 区块元素
+          this.canvas = document.createElement('canvas');
+          this.canvas.className = 'section-leaves';
+          this.host.prepend(this.canvas); // 放在内容底层
+          this.ctx = setupCanvas(this.canvas);
+          this.leaves = [];
+          this.lastT = 0;
+          this.setup();
+        }
+        setup(){
+          this.resize();
+          this.spawn();
+          const ro = new ResizeObserver(()=>{ this.resize(); this.spawn(); });
+          ro.observe(this.host);
+        }
+        resize(){
+          // 让画布跟随 host 尺寸
+          const rect = this.host.getBoundingClientRect();
+          this.canvas.style.width = rect.width + 'px';
+          this.canvas.style.height = rect.height + 'px';
+        }
+        spawn(){
+          this.leaves.length = 0;
+          const rect = this.host.getBoundingClientRect();
+          // 按面积决定数量，保证“若隐若现”
+          const area = Math.max(1, rect.width * rect.height);
+          const base = Math.round(Math.min(18, 6 + area / 80000)); // 上限18片
+          for(let i=0;i<base;i++) this.leaves.push(new Leaf(this));
+        }
+        updateDraw(t){
+          const ctx = this.ctx;
+          const rect = this.host.getBoundingClientRect();
+          ctx.clearRect(0,0,rect.width,rect.height);
+          for(const L of this.leaves){ L.update(t, rect); L.draw(ctx); }
+        }
       }
 
-      // 绿色落叶
-      const COLORS = [getCSS('--leaf1'),getCSS('--leaf2'),getCSS('--leaf3'),getCSS('--leaf4'),getCSS('--leaf5'),getCSS('--leaf6')];
-      const leaves = [];
-      const BASE_COUNT = 40;
-      const DENSITY = Math.max(0.8, Math.min(1.2, window.innerWidth/1200));
-      const leafCount = Math.floor(BASE_COUNT * DENSITY);
-
-      class Leaf {
-        constructor() { this.reset(true); }
-        reset(initial=false) {
-          this.size = 22 + Math.random()*24;   // 叶子大小 22~46
-          this.x = Math.random()*window.innerWidth;
-          this.y = initial ? Math.random()*120 - 120 : (-this.size - Math.random()*160); // 从顶端附近产生
-          this.speedY = 0.8 + Math.random()*1.3;  // 下落速度
-          this.swing = 0.8 + Math.random()*1.6;   // 左右摆动
+      class Leaf{
+        constructor(field){
+          this.field = field;
+          this.reset(true);
+        }
+        reset(initial=false){
+          const rect = this.field.host.getBoundingClientRect();
+          this.size = 12 + Math.random()*16;                         // 更小
+          this.x = Math.random()*rect.width;
+          this.y = initial ? (Math.random()*rect.height*0.6) : (-this.size - Math.random()*40);
+          this.vx = (Math.random()*0.3 - 0.15);                      // 更小水平速度
+          this.vy = 0.35 + Math.random()*0.55;                       // 更慢下落
           this.baseAngle = Math.random()*Math.PI*2;
+          this.swing = 0.28 + Math.random()*0.42;                    // 更小摆动（“跳小”）
           this.angle = Math.random()*Math.PI*2;
-          this.angularSpeed = (Math.random()*0.02 - 0.01);
+          this.angularSpeed = (Math.random()*0.008 - 0.004);         // 更小角速度
           this.color = COLORS[(Math.random()*COLORS.length)|0];
-          this.alpha = 0.95;
+          this.alpha = 0.85;
         }
-        update(t) {
-          this.y += this.speedY;
+        update(t, rect){
+          const wind = Math.sin(t*0.001 + this.baseAngle) * this.swing * 0.20;
+          this.vx += wind * 0.010;
+
+          // 限速
+          const MAX_SPEED = 1.5;
+          const speed = Math.hypot(this.vx, this.vy);
+          if (speed > MAX_SPEED){ const s = MAX_SPEED / speed; this.vx*=s; this.vy*=s; }
+
+          this.x += this.vx;
+          this.y += this.vy;
           this.angle += this.angularSpeed;
-          this.x += Math.sin(t*0.0012 + this.baseAngle) * this.swing * 0.7;
-          if (this.y > window.innerHeight + this.size*1.2) this.reset(false);
+
+          // 出界：在该区块内部循环
+          if (this.y > rect.height + this.size*1.2 || this.x < -60 || this.x > rect.width + 60){
+            this.reset(false);
+          }
         }
-        draw(ctx) {
+        draw(ctx){
           ctx.save();
           ctx.globalAlpha = this.alpha;
           ctx.translate(this.x, this.y);
           ctx.rotate(this.angle);
           ctx.fillStyle = this.color;
-          // 椭圆叶片
           ctx.beginPath();
-          ctx.ellipse(0, 0, this.size*0.52, this.size, 0, 0, Math.PI*2);
+          ctx.ellipse(0, 0, this.size*0.44, this.size*0.85, 0, 0, Math.PI*2);
           ctx.fill();
-          // 叶脉（淡）
-          ctx.globalAlpha = this.alpha * 0.12;
-          ctx.strokeStyle = "#000";
-          ctx.beginPath();
-          ctx.moveTo(0, -this.size);
-          ctx.lineTo(0, this.size);
-          ctx.stroke();
           ctx.restore();
         }
       }
-      for (let i=0;i<leafCount;i++) leaves.push(new Leaf());
 
-      let rafId = null;
-      function animate(t){
-        // 清空
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        // 先画树冠（固定在顶部 0~160px 高度）
-        drawCanopy();
-        // 再画落叶
-        for (const leaf of leaves){ leaf.update(t||0); leaf.draw(ctx); }
-        rafId = requestAnimationFrame(animate);
+      // 为标记 data-leaves="true" 的元素创建“局部叶子场”
+      const hosts = Array.from(document.querySelectorAll('[data-leaves="true"]'));
+      const fields = hosts.map(h => new SectionLeaves(h));
+
+      // 单一 RAF 驱动所有区块的叶子
+      function loop(t){
+        for(const f of fields) f.updateDraw(t||0);
+        requestAnimationFrame(loop);
       }
-      if (!reduceMotion){
-        animate(0);
-        document.addEventListener("visibilitychange", ()=>{
-          if (document.hidden){ if (rafId) cancelAnimationFrame(rafId); rafId=null; }
-          else if (!rafId){ rafId=requestAnimationFrame(animate); }
-        });
-      }
+      loop();
     })();
 
-    // ===== 安全自定义光标（只有初始化成功才隐藏系统光标） =====
+    // ============ 前景：小橘猫（靠近鼠标会停下“蹭一蹭”） ============
+    (function(){
+      const fg = document.getElementById('fgcanvas');
+      const ctx = fg.getContext('2d');
+
+      function resize(){
+        const DPR = Math.max(1, Math.min(window.devicePixelRatio||1, 2));
+        fg.width  = Math.floor(window.innerWidth * DPR);
+        fg.height = Math.floor(window.innerHeight * DPR);
+        fg.style.width = window.innerWidth+'px';
+        fg.style.height = window.innerHeight+'px';
+        ctx.setTransform(DPR,0,0,DPR,0,0);
+      }
+      window.addEventListener('resize', resize, {passive:true});
+      resize();
+
+      // 与内容融合：猫靠近时高亮这些元素
+      const mergeSelectors = ['.btn','a[href]','img','.card','header nav a','.hero-card'];
+      const mergeEls = Array.from(document.querySelectorAll(mergeSelectors.join(',')));
+
+      const CAT = {
+        size: 46,
+        x: window.innerWidth * 0.75,
+        y: window.innerHeight * 0.65,
+        vx: 0, vy: 0,
+        maxSpeed: 4.0,
+        accel: 0.20,
+        friction: 0.90,
+        angle: 0,
+        state: 'chase',            // 'chase' | 'cuddle'
+        cuddleRadius: 64,
+        cuddleUntil: 0,
+      };
+
+      let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+      window.addEventListener('mousemove', (e)=>{ mouseX=e.clientX; mouseY=e.clientY; }, {passive:true});
+
+      function updateCat(now){
+        const dx = mouseX - CAT.x, dy = mouseY - CAT.y;
+        const dist = Math.hypot(dx, dy) || 1;
+
+        if (dist <= CAT.cuddleRadius){ CAT.state = 'cuddle'; CAT.cuddleUntil = now + 650; }
+        else if (now > CAT.cuddleUntil){ CAT.state = 'chase'; }
+
+        let tx = mouseX, ty = mouseY;
+        if (CAT.state === 'cuddle'){ tx = mouseX - 18; ty = mouseY + 10; }
+
+        const ddx = tx - CAT.x, ddy = ty - CAT.y;
+        const d = Math.hypot(ddx, ddy) || 1;
+        const slow = Math.min(1, d / 120);
+        const ax = (ddx/d) * CAT.accel * slow;
+        const ay = (ddy/d) * CAT.accel * slow;
+
+        if (CAT.state === 'cuddle'){ CAT.vx = (CAT.vx + ax) * 0.85; CAT.vy = (CAT.vy + ay) * 0.85; }
+        else { CAT.vx = (CAT.vx + ax) * CAT.friction; CAT.vy = (CAT.vy + ay) * CAT.friction; }
+
+        const sp = Math.hypot(CAT.vx, CAT.vy);
+        const maxV = (CAT.state === 'cuddle') ? 1.2 : CAT.maxSpeed;
+        if (sp > maxV){ CAT.vx = CAT.vx/sp*maxV; CAT.vy = CAT.vy/sp*maxV; }
+
+        CAT.x += CAT.vx; CAT.y += CAT.vy;
+        CAT.angle = Math.atan2(CAT.vy, CAT.vx);
+
+        const pad = CAT.size * 0.8;
+        if (CAT.x < pad){ CAT.x = pad; CAT.vx = Math.abs(CAT.vx)*0.6; }
+        if (CAT.x > window.innerWidth - pad){ CAT.x = window.innerWidth - pad; CAT.vx = -Math.abs(CAT.vx)*0.6; }
+        if (CAT.y < pad){ CAT.y = pad; CAT.vy = Math.abs(CAT.vy)*0.6; }
+        if (CAT.y > window.innerHeight - pad){ CAT.y = window.innerHeight - pad; CAT.vy = -Math.abs(CAT.vy)*0.6; }
+      }
+
+      function drawCat(now){
+        const s = CAT.size;
+        ctx.save();
+        ctx.translate(CAT.x, CAT.y);
+
+        let headNod = 0, headShiftX = 0;
+        if (CAT.state === 'cuddle'){
+          headNod = Math.sin(now*0.02) * (s*0.03);
+          headShiftX = Math.sin(now*0.015) * (s*0.04);
+        }
+
+        ctx.rotate(CAT.angle);
+
+        const orange = '#f59e0b', orangeDeep = '#d97706', belly = '#fde68a', earPink = '#f8c3b5', eye = '#222';
+
+        ctx.globalAlpha = 0.18;
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.ellipse(-4, s*0.72, s*0.6, s*0.22, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+
+        const speedFactor = Math.hypot(CAT.vx, CAT.vy);
+        const wag = Math.sin(now*0.012) * (CAT.state==='cuddle' ? 4 : Math.min(12, speedFactor*2.2));
+        ctx.strokeStyle = orangeDeep;
+        ctx.lineWidth = Math.max(6, s*0.12);
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(-s*0.1, s*0.15);
+        ctx.quadraticCurveTo(-s*0.55, s*0.05 + wag*0.2, -s*0.7, -s*0.05 + wag);
+        ctx.stroke();
+
+        ctx.fillStyle = orange;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, s*0.7, s*0.5, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.fillStyle = belly;
+        ctx.beginPath();
+        ctx.ellipse(s*0.1, s*0.05, s*0.35, s*0.28, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.strokeStyle = orangeDeep; ctx.lineWidth = 3;
+        for (let i=-1;i<=1;i++){
+          ctx.beginPath(); ctx.moveTo(-s*0.05 + i*s*0.15, -s*0.25); ctx.lineTo(-s*0.15 + i*s*0.15, -s*0.05); ctx.stroke();
+        }
+
+        ctx.save();
+        ctx.translate(s*0.55 + headShiftX, -s*0.05 + headNod);
+        ctx.fillStyle = orange;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, s*0.36, s*0.3, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.fillStyle = orangeDeep;
+        ctx.beginPath(); ctx.moveTo(-s*0.18, -s*0.22); ctx.lineTo(-s*0.02, -s*0.36); ctx.lineTo(0, -s*0.18); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(s*0.08, -s*0.22);  ctx.lineTo(s*0.22, -s*0.36); ctx.lineTo(s*0.18, -s*0.16); ctx.closePath(); ctx.fill();
+
+        ctx.fillStyle = earPink;
+        ctx.beginPath(); ctx.moveTo(-s*0.12, -s*0.22); ctx.lineTo(-s*0.02, -s*0.30); ctx.lineTo(-s*0.02, -s*0.18); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(s*0.12, -s*0.22);  ctx.lineTo(s*0.20, -s*0.30); ctx.lineTo(s*0.16, -s*0.18); ctx.closePath(); ctx.fill();
+
+        ctx.fillStyle = eye;
+        if (CAT.state === 'cuddle'){
+          ctx.strokeStyle = eye; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(-s*0.08, -s*0.05); ctx.lineTo(0, -s*0.05); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(s*0.06, -s*0.05);  ctx.lineTo(s*0.16, -s*0.05); ctx.stroke();
+        }else{
+          ctx.beginPath();
+          ctx.ellipse(-s*0.04, -s*0.05, s*0.04, s*0.05, 0, 0, Math.PI*2);
+          ctx.ellipse(s*0.10, -s*0.05, s*0.04, s*0.05, 0, 0, Math.PI*2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.ellipse(s*0.03, s*0.02, s*0.02, s*0.015, 0, 0, Math.PI*2); ctx.fill();
+
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
+        for (let i=-1;i<=1;i++){
+          ctx.beginPath(); ctx.moveTo(-s*0.02, s*0.02 + i*4); ctx.lineTo(-s*0.13, s*0.0 + i*4); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(s*0.08, s*0.02 + i*4);  ctx.lineTo(s*0.19, s*0.0 + i*4); ctx.stroke();
+        }
+
+        ctx.restore(); // 头
+        ctx.restore();
+      }
+
+      function applyMergeEffects(){
+        const R = 90;
+        for(const el of mergeEls){
+          const rect = el.getBoundingClientRect();
+          const cx = rect.left + rect.width/2;
+          const cy = rect.top + rect.height/2;
+          const dx = cx - CAT.x, dy = cy - CAT.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < R) el.classList.add('cat-near');
+          else el.classList.remove('cat-near');
+        }
+      }
+
+      function animate(t){
+        ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+        updateCat(t||0);
+        drawCat(t||0);
+        applyMergeEffects();
+        requestAnimationFrame(animate);
+      }
+      animate(0);
+    })();
+
+    // ============ 绿色美化光标 ============
     (function(){
       const dot = document.querySelector('.cursor-dot');
       const ring = document.querySelector('.cursor-ring');
-      if (!dot || !ring) return;
-      const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      // 触屏设备不启用
-      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      if (reduceMotion || isTouch) return;
-
-      // 初始化成功后再隐藏系统光标
+      if(!dot || !ring) return;
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints>0;
+      if(isTouch) return;
       document.body.classList.add('use-custom-cursor');
-
-      let x = window.innerWidth/2, y = window.innerHeight/2;
-      let rx = x, ry = y; // ring 慢跟随
-      let rafId = null;
-
-      function onMove(e){
-        x = e.clientX; y = e.clientY;
-        dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
-      }
-      window.addEventListener('mousemove', onMove, { passive: true });
-
-      function loop(){
-        rx += (x - rx) * 0.18;
-        ry += (y - ry) * 0.18;
-        ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
-        rafId = requestAnimationFrame(loop);
-      }
+      let x=window.innerWidth/2, y=window.innerHeight/2, rx=x, ry=y;
+      function onMove(e){ x=e.clientX; y=e.clientY; dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`; }
+      window.addEventListener('mousemove', onMove, {passive:true});
+      function loop(){ rx += (x-rx)*0.18; ry += (y-ry)*0.18; ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`; requestAnimationFrame(loop); }
       loop();
+      const hoverables=['a','button','[role="button"]','.btn','input','select','textarea','summary','label'];
+      document.addEventListener('mouseover', e=>{ if(hoverables.some(sel=>e.target.closest(sel))) document.body.classList.add('cursor-hover'); });
+      document.addEventListener('mouseout',  e=>{ if(hoverables.some(sel=>e.target.closest(sel))) document.body.classList.remove('cursor-hover'); });
+      document.addEventListener('mousedown', ()=>{ document.body.classList.add('cursor-pulse'); setTimeout(()=>document.body.classList.remove('cursor-pulse'), 350); });
+    })();
 
-      const hoverables = ['a','button','[role="button"]','.btn','input','select','textarea','summary','label'];
-      document.addEventListener('mouseover', (e)=>{
-        if (hoverables.some(sel => e.target.closest(sel))) document.body.classList.add('cursor-hover');
-      });
-      document.addEventListener('mouseout', (e)=>{
-        if (hoverables.some(sel => e.target.closest(sel))) document.body.classList.remove('cursor-hover');
-      });
-
-      document.addEventListener('visibilitychange', ()=>{
-        if (document.hidden && rafId){ cancelAnimationFrame(rafId); rafId=null; }
-        else if (!rafId){ rafId=requestAnimationFrame(loop); }
-      });
+    // ============ 移动端抽屉菜单（可选） ============
+    (function(){
+      const drawer = document.getElementById('drawer');
+      const openBtn = document.getElementById('open');
+      const closeBtn = document.getElementById('close');
+      if(openBtn && drawer){ openBtn.addEventListener('click', ()=>{ drawer.style.display='block'; }); }
+      if(closeBtn && drawer){ closeBtn.addEventListener('click', ()=>{ drawer.style.display='none'; }); }
+      drawer?.addEventListener('click', (e)=>{ if(e.target===drawer) drawer.style.display='none'; });
     })();
   </script>
 </body>
