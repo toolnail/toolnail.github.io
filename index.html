@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>你的名字 | 个人主页</title>
+  <meta name="description" content="你的名字的学术主页：研究方向、发表论文、项目、博客与联系信息。" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧑‍💻</text></svg>">
+  <style>
+    :root{
+      --bg:#ffffff; --fg:#0f172a; --sub:#475569; --muted:#e2e8f0; --card:#f8fafc; --link:#2563eb;
+      --accent:#0ea5e9; --shadow:0 8px 30px rgba(2,6,23,0.08);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b1220; --fg:#e5e7eb; --sub:#9ca3af; --muted:#1f2937; --card:#0f172a; --link:#60a5fa; --accent:#22d3ee; }
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "PingFang SC", "Noto Sans CJK SC", "Microsoft Yahei", sans-serif}
+    a{color:var(--link);text-decoration:none}
+    a:hover{text-decoration:underline}
+    .container{max-width:1100px;margin:0 auto;padding:0 20px}
+    header{position:sticky;top:0;z-index:20;background:color-mix(in oklab, var(--bg) 85%, transparent);backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--muted)}
+    nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:700}
+    .brand img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--muted)}
+    .navlinks{display:flex;gap:18px;align-items:center}
+    .navlinks a{padding:6px 10px;border-radius:10px}
+    .navlinks a:hover{background:var(--muted)}
+    .menu-btn{display:none}
+    @media (max-width:820px){
+      .navlinks{display:none}
+      .menu-btn{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--muted);padding:6px 10px;border-radius:10px;background:transparent;color:var(--fg)}
+      #drawer{display:block}
+    }
+    /* Drawer */
+    #drawer{display:none;position:fixed;inset:0;background:rgba(2,6,23,0.6);z-index:30}
+    #drawer .panel{position:absolute;right:0;top:0;height:100%;width:78%;max-width:320px;background:var(--bg);padding:22px;border-left:1px solid var(--muted)}
+    #drawer a{display:block;padding:10px 6px;border-radius:8px}
+    #drawer a:hover{background:var(--muted)}
+
+    .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center;padding:42px 0}
+    .hero-card{background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:22px;box-shadow:var(--shadow)}
+    .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .tag{font-size:12px;background:var(--muted);color:var(--fg);padding:4px 8px;border-radius:999px}
+    .grid{display:grid;gap:20px}
+    @media (min-width:901px){.grid-3{grid-template-columns:repeat(3,1fr)} }
+    @media (max-width:900px){.hero{grid-template-columns:1fr} }
+    section{padding:28px 0}
+    h1,h2{line-height:1.2;margin:0}
+    h2{font-size:26px;margin-bottom:10px}
+    .card{background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+    .list{list-style:none;margin:0;padding:0}
+    .list li{padding:10px 0;border-bottom:1px dashed var(--muted)}
+    .list li:last-child{border-bottom:none}
+    .footer{padding:40px 0;border-top:1px solid var(--muted);font-size:14px;color:var(--sub)}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:var(--muted);padding:6px 10px;border-radius:999px}
+    .right{margin-left:auto}
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;background:var(--muted);padding:2px 6px;border-radius:6px;font-size:12px}
+    .muted{color:var(--sub)}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--muted);border-radius:10px;padding:8px 12px}
+    .btn:hover{background:var(--muted)}
+    .post-meta{font-size:13px;color:var(--sub)}
+    .section-title{display:flex;align-items:center;gap:12px}
+    .section-title .line{height:1px;flex:1;background:var(--muted)}
+    .wrap{display:flex;flex-wrap:wrap;gap:10px}
+    .pub{display:grid;grid-template-columns:auto 1fr;gap:12px}
+    .pub-badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--muted)}
+  </style>
+  <script>
+    const onReady=()=>{
+      const drawer=document.getElementById('drawer');
+      const openBtn=document.getElementById('open');
+      const closeBtn=document.getElementById('close');
+      const links=document.querySelectorAll('#drawer a');
+      const toggle=(show)=>{drawer.style.display=show?'block':'none'}
+      openBtn?.addEventListener('click',()=>toggle(true))
+      closeBtn?.addEventListener('click',()=>toggle(false))
+      links.forEach(a=>a.addEventListener('click',()=>toggle(false)))
+    };
+    document.addEventListener('DOMContentLoaded', onReady);
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Person",
+    "name":"你的名字",
+    "url":"https://yourname.github.io/",
+    "affiliation":"你的单位",
+    "jobTitle":"职位/学生",
+    "sameAs":["https://scholar.google.com/citations?user=你的ID","https://github.com/yourname"],
+    "email":"mailto:you@example.com"
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img src="https://avatars.githubusercontent.com/u/9919" alt="avatar" />
+          <span>你的名字</span>
+        </div>
+        <div class="navlinks">
+          <a href="#about">关于</a>
+          <a href="#news">动态</a>
+          <a href="#pubs">论文</a>
+          <a href="#projects">项目</a>
+          <a href="#posts">博客</a>
+          <a href="#contact">联系</a>
+        </div>
+        <button id="open" class="menu-btn">菜单 ▾</button>
+      </nav>
+    </div>
+  </header>
+
+  <div id="drawer" aria-hidden="true">
+    <div class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <strong>导航</strong>
+        <button id="close" class="btn">关闭</button>
+      </div>
+      <a href="#about">关于</a>
+      <a href="#news">动态</a>
+      <a href="#pubs">论文</a>
+      <a href="#projects">项目</a>
+      <a href="#posts">博客</a>
+      <a href="#contact">联系</a>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-card">
+        <h1 style="font-size:32px">你好，我是 <span style="color:var(--accent);font-weight:800">你的名字</span></h1>
+        <p class="muted">（一句话介绍：研究方向 / 学校 / 实验室 / 求职状态）</p>
+        <div class="tags">
+          <span class="tag">5G / IAB</span>
+          <span class="tag">网络优化</span>
+          <span class="tag">MILP / CVX / Gurobi</span>
+        </div>
+        <div class="wrap" style="margin-top:14px">
+          <a class="btn" href="#pubs">最新论文</a>
+          <a class="btn" href="files/CV.pdf">下载简历（PDF）</a>
+          <a class="btn" href="https://scholar.google.com/" target="_blank" rel="noreferrer">Google Scholar</a>
+          <a class="btn" href="https://github.com/yourname" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <h2>座右铭</h2>
+        <p class="muted">在这里放一段个人宣言或兴趣方向。也可放一张肖像/风景图。</p>
+        <img src="https://picsum.photos/1200/800" alt="cover" style="width:100%;height:auto;border-radius:12px;margin-top:8px;border:1px solid var(--muted)"/>
+      </div>
+    </section>
+
+    <section id="news">
+      <div class="section-title"><h2>最新动态</h2><div class="line"></div></div>
+      <div class="card">
+        <ul class="list">
+          <li><span class="post-meta">2025-08</span> 🎉 一篇论文被 <strong>IEEE Communications Letters</strong> 接收。</li>
+          <li><span class="post-meta">2025-06</span> 🛰️ 开源 <strong>IAB 网络仿真</strong> 代码与数据。</li>
+          <li><span class="post-meta">2025-05</span> 🏆 获得 <strong>优秀研究生奖学金</strong>。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="section-title"><h2>关于我</h2><div class="line"></div></div>
+      <div class="card">
+        <p>我目前在 <strong>你的单位</strong> 从事 <em>5G/IAB 网络优化</em> 研究，关注 <strong>拓扑设计、混合整数规划、能效与拥塞缓解</strong> 等方向。熟悉 MATLAB、Python、CVX、Gurobi 与 Blender/Ray-tracing 脚本化。</p>
+        <p>欢迎合作与交流：科研落地、算法实现、开源共建。</p>
+      </div>
+    </section>
+
+    <section id="pubs">
+      <div class="section-title"><h2>精选论文</h2><div class="line"></div></div>
+      <div class="grid grid-3">
+        <article class="card">
+          <div class="pub">
+            <span class="pub-badge">2025</span>
+            <div>
+              <a href="#">Progressive IAB Network Augmentation via Hybrid Fiber-Wireless Topology Optimization</a>
+              <div class="post-meta">CL（通信快报） | 第一作者</div>
+              <div class="wrap" style="margin-top:8px">
+                <a class="pill" href="#">PDF</a>
+                <a class="pill" href="#">代码</a>
+                <a class="pill" href="#">BibTeX</a>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="pub">
+            <span class="pub-badge">2024</span>
+            <div>
+              <a href="#">Routing & Energy Optimization in IAB Networks with Closed-loop O-RAN</a>
+              <div class="post-meta">期刊/会议 | 通讯作者</div>
+              <div class="wrap" style="margin-top:8px">
+                <a class="pill" href="#">PDF</a>
+                <a class="pill" href="#">代码</a>
+                <a class="pill" href="#">海报</a>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="pub">
+            <span class="pub-badge">2023</span>
+            <div>
+              <a href="#">Topology Formation for Robust mmWave IAB Backhaul</a>
+              <div class="post-meta">期刊/会议 | 学术合作</div>
+              <div class="wrap" style="margin-top:8px">
+                <a class="pill" href="#">PDF</a>
+                <a class="pill" href="#">数据</a>
+                <a class="pill" href="#">Slides</a>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="section-title"><h2>项目</h2><div class="line"></div></div>
+      <div class="grid grid-3">
+        <div class="card">
+          <strong>IAB-Opt</strong>
+          <p class="muted">IAB 网络拓扑与光纤增强的 MILP/MINLP 优化工具包。</p>
+          <a class="btn" href="#">GitHub</a>
+        </div>
+        <div class="card">
+          <strong>UAV-RF-Reflect</strong>
+          <p class="muted">双无人机多角度 RF 反射率测量与路径规划。</p>
+          <a class="btn" href="#">文档</a>
+        </div>
+        <div class="card">
+          <strong>5G-ChannelSim</strong>
+          <p class="muted">5G 信道建模、LOS/NLOS、瑞利/莱斯、容量分析。</p>
+          <a class="btn" href="#">代码</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="posts">
+      <div class="section-title"><h2>最新博客</h2><div class="line"></div></div>
+      <div class="card">
+        <ul class="list">
+          <li>
+            <a href="#">使用 McCormick 线性化处理二元×连续乘积</a>
+            <div class="post-meta">2025-08 · 优化/MIP · 3 min read</div>
+          </li>
+          <li>
+            <a href="#">IAB 网络中最大流基线的实现细节</a>
+            <div class="post-meta">2025-07 · IAB/图优化 · 5 min read</div>
+          </li>
+          <li>
+            <a href="#">用 CVX 与 Gurobi 重构节点选择-连接问题</a>
+            <div class="post-meta">2025-06 · CVX/Gurobi · 4 min read</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-title"><h2>联系</h2><div class="line"></div></div>
+      <div class="card">
+        <p><strong>邮箱：</strong>you@example.com &nbsp;&nbsp; <span class="kbd">PGP</span></p>
+        <p><strong>地址：</strong>某某大学 · 某某实验室 · 城市</p>
+        <div class="wrap">
+          <a class="pill" href="mailto:you@example.com">给我写信</a>
+          <a class="pill" href="/atom.xml">RSS</a>
+          <a class="pill" href="/sitemap.xml">Sitemap</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span>© <span id="y"></span> 你的名字</span>
+      <span class="muted">·</span>
+      <a href="https://github.com/yourname/yourname.github.io" target="_blank" rel="noreferrer">源代码</a>
+      <span class="right muted">本页自动适配浅/深色模式 · 纯静态，无依赖</span>
+    </div>
+  </footer>
+  <script>document.getElementById('y').textContent = new Date().getFullYear()</script>
+</body>
+</html>
