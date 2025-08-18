@@ -11,14 +11,11 @@
       --bg:#e8f5e9; --fg:#0f172a; --sub:#475569; --muted:#e2e8f0; --card:#f8fafc; --link:#2563eb;
       --accent:#0ea5e9; --shadow:0 8px 30px rgba(2,6,23,0.08);
 
-      /* 夏日绿叶 + 树干 */
       --leaf1:#22c55e; --leaf2:#16a34a; --leaf3:#10b981; --leaf4:#34d399; --leaf5:#65a30d; --leaf6:#4d7c0f;
       --trunkDark:#6e4a2f; --trunkMid:#8b5e3c; --trunkLight:#b98557;
 
-      /* 侧边树叶色（淡淡几团，窄屏隐藏） */
       --treeLight:#b9f3c5; --treeMid:#7fd785; --treeDeep:#4caf50;
 
-      /* 绿色自定义光标 */
       --cursor-dot:#16a34a; --cursor-ring:#16a34a;
     }
     @media (prefers-color-scheme: dark){
@@ -82,35 +79,67 @@
     .pub{display:grid;grid-template-columns:auto 1fr;gap:12px}
     .pub-badge{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--muted)}
 
-    /* 层次：主内容 1；章节内画布 0（在内容背景）；前景猫 3；头部 20 */
+    /* 层次：主内容 1；章节内画布 0；前景猫 3；头部 20 */
     main, footer { position: relative; z-index: 1; }
     #bgcanvas { position: fixed; inset: 0; z-index: 0; pointer-events:none; display:block; }
     .section-leaves{ position:absolute; inset:0; z-index:-1; pointer-events:none; display:block; mix-blend-mode: multiply; opacity:.85; }
     #fgcanvas { position: fixed; inset: 0; z-index: 3; pointer-events:none; display:block; }
 
+    /* ====== 自定义光标（六边形嵌入光环，保证同心） ====== */
     body.use-custom-cursor{ cursor: none; }
-    .cursor-dot, .cursor-ring{
-      position: fixed; top:0; left:0; transform: translate(-50%,-50%);
-      pointer-events:none; z-index:1000; will-change: transform, opacity, width, height;
-    }
-    .cursor-dot{
-      width:12px; height:12px; border-radius:50%;
-      background: radial-gradient(circle at 30% 30%, #7fffb1 0%, var(--cursor-dot) 60%, #0e8240 100%);
-      box-shadow: 0 0 8px rgba(34,197,94,.6), 0 0 18px rgba(34,197,94,.35);
-      transition: transform .15s ease, opacity .2s ease;
-    }
     .cursor-ring{
-      width:48px; height:48px; border-radius:50%;
-      box-shadow: 0 0 0 2px rgba(34,197,94,.9), inset 0 0 30px rgba(34,197,94,.15);
-      background: radial-gradient(circle, rgba(34,197,94,.12), rgba(34,197,94,.06) 60%, transparent 70%);
-      transition: transform .2s ease, opacity .25s ease;
+      position: fixed;
+      top:0; left:0;
+      pointer-events:none;
+      z-index:100000;
+      --tf: translate(-50%,-50%);
+      transform: var(--tf) scale(var(--scale,1));
+      width:60px; height:60px; border-radius:50%;
+      border: 1.5px dashed rgba(34,211,238,0.7);
+      box-shadow: 0 0 12px rgba(34,211,238,.6), inset 0 0 20px rgba(74,222,128,.25);
+      background: radial-gradient(circle, rgba(34,211,238,.15), transparent 70%);
+      position: fixed;
+      will-change: transform;
     }
-    .cursor-hover .cursor-dot { transform: translate(-50%,-50%) scale(1.6); }
-    .cursor-hover .cursor-ring { transform: translate(-50%,-50%) scale(1.25); }
+    /* 旋转外圈 */
+    .cursor-ring::before{
+      content:"";
+      position:absolute; inset:-4px;
+      border-radius:50%;
+      border: 2px dashed rgba(34,211,238,0.9);
+      box-shadow: 0 0 10px rgba(34,211,238,.45);
+      animation: ring-rotate 4s linear infinite;
+    }
+    @keyframes ring-rotate{
+      from{ transform: rotate(0deg); }
+      to  { transform: rotate(360deg); }
+    }
+
+    /* 六边形点，作为光环的子元素绝对居中 */
+    .cursor-dot{
+      position:absolute; inset:auto;
+      top:50%; left:50%;
+      transform: translate(-50%,-50%) scale(var(--scale,1));
+      width:14px; height:14px;
+    }
+    .cursor-dot::before{
+      content:"";
+      position:absolute; inset:0;
+      clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+      background: linear-gradient(145deg,#22d3ee,#4ade80);
+      box-shadow: 0 0 6px #22d3ee, 0 0 12px #4ade80;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius:4px;
+    }
+
+    /* 悬停放大：两者共用同一变量，仍然同心 */
+    .cursor-hover .cursor-ring{ --scale:1.25; }
+    .cursor-hover .cursor-dot { --scale:1.6; }
+
     .cursor-pulse .cursor-ring { animation: pulse .35s ease-out 1; }
     @keyframes pulse{
-      0%{ transform: translate(-50%,-50%) scale(1); box-shadow: 0 0 0 2px rgba(34,197,94,.9), inset 0 0 0 rgba(34,197,94,.2); }
-      100%{ transform: translate(-50%,-50%) scale(1.6); box-shadow: 0 0 0 0 rgba(34,197,94,0), inset 0 0 60px rgba(34,197,94,.25); }
+      0%{ transform: var(--tf) scale(var(--scale,1)); box-shadow: 0 0 0 2px rgba(34,197,94,.9), inset 0 0 0 rgba(34,197,94,.2); }
+      100%{ transform: var(--tf) scale(calc(var(--scale,1)*1.6)); box-shadow: 0 0 0 0 rgba(34,197,94,0), inset 0 0 60px rgba(34,197,94,.25); }
     }
 
     .cat-near{
@@ -121,11 +150,11 @@
 
     @media (prefers-reduced-motion: reduce){
       #bgcanvas,#fgcanvas,.section-leaves{ display:none !important; }
-      .cursor-dot,.cursor-ring{ display:none !important; }
+      .cursor-ring{ display:none !important; }
       body{ cursor:auto !important; }
     }
 
-    /* ===================== 开场动画覆层（丛林+狂风+科技字+打字机） ===================== */
+    /* ===================== 开场动画覆层 ===================== */
     body.splash-lock { overflow:hidden; }
     #splash-intro{
       position:fixed; inset:0; z-index:99999; display:grid; place-items:center;
@@ -135,61 +164,30 @@
       color:#e5e7eb; transition: opacity .9s ease, visibility .9s ease;
     }
     #splash-intro.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+    #splash-layer, #wind-layer{ position:absolute; inset:0; display:block; pointer-events:none; }
+    #splash-layer{ z-index:0; } #wind-layer{ z-index:1; }
 
-    #splash-layer, #wind-layer{
-      position:absolute; inset:0; display:block; pointer-events:none;
-    }
-    #splash-layer{ z-index:0; }
-    #wind-layer{ z-index:1; }
-
-    .splash-text{
-      position:relative; z-index:2; text-align:center; user-select:none;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "JetBrains Mono", monospace;
-      letter-spacing:.6px; padding:0 16px;
-    }
-    .splash-title{
-      font-weight:900; font-size:clamp(26px, 6vw, 56px);
-      text-transform:uppercase;
-      text-shadow: 0 0 6px rgba(99,102,241,.9),
-                   0 0 18px rgba(59,130,246,.75),
-                   0 0 36px rgba(16,185,129,.55);
-      filter: drop-shadow(0 4px 16px rgba(2,6,23,.45));
-      min-height: 1.4em;
-    }
-    /* 打字机光标 */
-    .caret{
-      display:inline-block; width:0.8ch; margin-left:2px;
-      border-right: 2px solid #22d3ee;
-      filter: drop-shadow(0 0 8px rgba(34,211,238,.9));
-      animation: blink .9s steps(1,end) infinite;
-      vertical-align: -3px;
-    }
+    .splash-text{ position:relative; z-index:2; text-align:center; user-select:none; letter-spacing:.6px; padding:0 16px; }
+    .splash-title{ font-weight:900; font-size:clamp(26px, 6vw, 56px); text-transform:uppercase;
+      text-shadow: 0 0 6px rgba(99,102,241,.9), 0 0 18px rgba(59,130,246,.75), 0 0 36px rgba(16,185,129,.55);
+      filter: drop-shadow(0 4px 16px rgba(2,6,23,.45)); min-height: 1.4em; }
+    .caret{ display:inline-block; width:0.8ch; margin-left:2px; border-right: 2px solid #22d3ee;
+      filter: drop-shadow(0 0 8px rgba(34,211,238,.9)); animation: blink .9s steps(1,end) infinite; vertical-align:-3px; }
     @keyframes blink{ 0%,49%{opacity:1} 50%,100%{opacity:0} }
-
     .splash-sub{ margin-top:10px; font-size:clamp(12px, 2.6vw, 16px); opacity:.75; }
 
-    /* 右下角 skip 按钮（唯一跳过入口） */
-    #skip-btn{
-      position: fixed; right: 18px; bottom: 18px; z-index: 3;
+    #skip-btn{ position: fixed; right: 18px; bottom: 18px; z-index: 3;
       padding: 10px 14px; border-radius: 999px; font-weight:600;
       background: rgba(2,6,23,.6); color:#e5e7eb; border:1px solid rgba(148,163,184,.35);
-      backdrop-filter: blur(6px) saturate(1.1);
-      box-shadow: 0 6px 18px rgba(0,0,0,.25);
-      cursor: pointer;
-      transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease;
-    }
+      backdrop-filter: blur(6px) saturate(1.1); box-shadow: 0 6px 18px rgba(0,0,0,.25); cursor: pointer;
+      transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease; }
     #skip-btn:hover{ transform: translateY(-1px); background: rgba(2,6,23,.72); }
     #skip-btn:active{ transform: translateY(0); }
-
-    @media (prefers-reduced-motion: reduce){
-      .splash-title{ text-shadow:none; filter:none; }
-      .caret{ animation: blink 1.2s steps(1,end) infinite; }
-    }
   </style>
 </head>
 <body>
 
-  <!-- ============= 开场动画覆层（新增） ============= -->
+  <!-- ============= 开场动画覆层 ============= -->
   <div id="splash-intro" role="dialog" aria-label="intro animation">
     <canvas id="splash-layer"></canvas>
     <canvas id="wind-layer"></canvas>
@@ -202,14 +200,15 @@
     <button id="skip-btn" type="button" aria-label="skip intro">Skip ▸</button>
   </div>
 
-  <!-- 背景树干（轻量） -->
+  <!-- 背景树干 -->
   <canvas id="bgcanvas" aria-hidden="true"></canvas>
   <!-- 前景小橘猫 -->
   <canvas id="fgcanvas" aria-hidden="true"></canvas>
 
-  <!-- 自定义光标 -->
-  <div class="cursor-ring" aria-hidden="true"></div>
-  <div class="cursor-dot" aria-hidden="true"></div>
+  <!-- 自定义光标（六边形嵌在光环里，天然居中） -->
+  <div class="cursor-ring" aria-hidden="true">
+    <div class="cursor-dot" aria-hidden="true"></div>
+  </div>
 
   <header>
     <div class="container">
@@ -249,7 +248,7 @@
   <main class="container">
     <section class="hero" data-leaves="true">
       <div class="hero-card" data-leaves="true">
-        <h1 style="font-size:32px">Hello, I am <span style="color:var(--accent);font-weight:800">Ruxin Wang(王汝心)</span></h1>
+        <h1 style="font-size:32px">Hello, I am <span style="color:var(--accent);font-weight:800)">Ruxin Wang(王汝心)</span></h1>
         <p class="muted">I am currently pursuing a Ph.D. degree at Shanghai Jiao Tong University.</p>
         <div class="wrap" style="margin-top:14px">
           <a class="btn" href="#pubs">New Paper</a>
@@ -637,24 +636,35 @@
 
     // ============ 绿色美化光标 ============
     (function(){
-      const dot = document.querySelector('.cursor-dot');
       const ring = document.querySelector('.cursor-ring');
-      if(!dot || !ring) return;
-      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints>0;
-      if(isTouch) return;
+      if(!ring) return;
+      const finePointer = window.matchMedia('(pointer: fine)').matches;
+      if(!finePointer) return;
+
       document.body.classList.add('use-custom-cursor');
+
+      // 目标坐标（鼠标）与平滑坐标（渲染）
       let x=window.innerWidth/2, y=window.innerHeight/2, rx=x, ry=y;
-      function onMove(e){ x=e.clientX; y=e.clientY; dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`; }
-      window.addEventListener('mousemove', onMove, {passive:true});
-      function loop(){ rx += (x-rx)*0.18; ry += (y-ry)*0.18; ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`; requestAnimationFrame(loop); }
+
+      window.addEventListener('mousemove', e => { x = e.clientX; y = e.clientY; }, {passive:true});
+
+      // 只移动光环；六边形在光环内部绝对居中 → 永远同心
+      function loop(){
+        rx += (x - rx) * 0.18;
+        ry += (y - ry) * 0.18;
+        const tf = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+        ring.style.setProperty('--tf', tf);
+        requestAnimationFrame(loop);
+      }
       loop();
+
       const hoverables=['a','button','[role="button"]','.btn','input','select','textarea','summary','label'];
       document.addEventListener('mouseover', e=>{ if(hoverables.some(sel=>e.target.closest(sel))) document.body.classList.add('cursor-hover'); });
       document.addEventListener('mouseout',  e=>{ if(hoverables.some(sel=>e.target.closest(sel))) document.body.classList.remove('cursor-hover'); });
       document.addEventListener('mousedown', ()=>{ document.body.classList.add('cursor-pulse'); setTimeout(()=>document.body.classList.remove('cursor-pulse'), 350); });
     })();
 
-    // ============ 移动端抽屉菜单（可选） ============
+    // ============ 移动端抽屉菜单 ============
     (function(){
       const drawer = document.getElementById('drawer');
       const openBtn = document.getElementById('open');
@@ -664,11 +674,11 @@
       drawer?.addEventListener('click', (e)=>{ if(e.target===drawer) drawer.style.display='none'; });
     })();
 
-    /* ==================== 开场动画逻辑（丛林+狂风+打字机） ==================== */
+    /* ==================== 开场动画逻辑 ==================== */
     (function(){
       const SPLASH_DURATION = 10000; // 10s
-      const TYPE_DELAY_MS   = 1500;  // 开打前等待
-      const TYPE_SPEED_MS   = 38;    // 打字速度（每字符间隔）
+      const TYPE_DELAY_MS   = 1500;
+      const TYPE_SPEED_MS   = 38;
 
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const duration = prefersReduced ? 1200 : SPLASH_DURATION;
@@ -700,7 +710,6 @@
       }
       window.addEventListener('resize', resize, {passive:true}); resize();
 
-      // 丛林与叶子
       const leaves = [];
       const vines = [];
       const COLORS = [css('--leaf1'),css('--leaf2'),css('--leaf3'),css('--leaf4'),css('--leaf5'),css('--leaf6')];
@@ -740,18 +749,13 @@
       }
       spawnVines(); spawnLeaves();
 
-      // 狂风控制
-      let windPower = 0;      // 0~1
-      let gustTarget = 0;
-      const GUST_START = Math.max(2000, duration*0.55);
-      const GUST_END   = Math.min(duration-1800, GUST_START+1800);
+      let windPower = 0; let gustTarget = 0;
+      const GUST_START = Math.max(2000, SPLASH_DURATION*0.55);
+      const GUST_END   = Math.min(SPLASH_DURATION-1800, GUST_START+1800);
 
       function scheduleGust(t){
-        if (t > GUST_START && t < GUST_END){
-          gustTarget = 1;
-        } else if (t >= GUST_END){
-          gustTarget = 0;
-        }
+        if (t > GUST_START && t < GUST_END){ gustTarget = 1; }
+        else if (t >= GUST_END){ gustTarget = 0; }
         windPower += (gustTarget - windPower)*0.03;
       }
 
@@ -790,8 +794,7 @@
         for (const L of leaves){
           L.vx += windPower*0.35 + Math.sin(L.a*3)*0.02;
           L.vy += Math.sin(L.a*2)*0.005;
-          L.x += L.vx;
-          L.y += L.vy;
+          L.x += L.vx; L.y += L.vy;
           L.a += L.rot + windPower*0.02;
           if (L.x > window.innerWidth + 40) L.x = -40;
           if (L.y > window.innerHeight + 20){ L.y = -20; L.x = rand(-20, window.innerWidth+20); }
@@ -827,11 +830,10 @@
 
         drawWindTrails();
 
-        if (!splash.classList.contains('hidden')) requestAnimationFrame(loop);
+        if (!document.getElementById('splash-intro').classList.contains('hidden')) requestAnimationFrame(loop);
       }
       requestAnimationFrame(loop);
 
-      // 打字机效果 ---------------------------------------------------------
       const FULL_TEXT = "Welcome to WangRuxin personal page";
       function typeWriter(text, el, startDelay=0, speed=36){
         el.textContent = "";
@@ -847,23 +849,20 @@
         }
         requestAnimationFrame(step);
       }
-      // 稍等一会儿再开始打字
-      setTimeout(()=> typeWriter(FULL_TEXT, typeEl, 0, typeSpeed), typeDelay);
+      setTimeout(()=> typeWriter(FULL_TEXT, document.getElementById('type-target'), 0, 38), 1500);
 
-      // 结束与 Skip（只有按钮能跳） ----------------------------------------
       function hideSplash(){
+        const splash = document.getElementById('splash-intro');
         if (splash.classList.contains('hidden')) return;
         splash.classList.add('hidden');
         document.body.classList.remove('splash-lock');
         setTimeout(()=> splash.remove(), 900);
       }
-      const timer = setTimeout(hideSplash, duration);
-      skipBtn.addEventListener('click', () => {
+      const timer = setTimeout(hideSplash, 10000);
+      document.getElementById('skip-btn').addEventListener('click', () => {
         clearTimeout(timer);
         hideSplash();
       }, {once:true});
-
-      // 禁止其他方式跳过（不绑定键盘/背景点击）
     })();
   </script>
 </body>
