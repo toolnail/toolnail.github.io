@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
@@ -8,7 +8,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧑‍💻</text></svg>">
   <style>
     :root{
-      --bg:#ffffff; --fg:#0f172a; --sub:#475569; --muted:#e2e8f0; --card:#f8fafc; --link:#2563eb;
+      --bg:#e8f5e9; --fg:#0f172a; --sub:#475569; --muted:#e2e8f0; --card:#f8fafc; --link:#2563eb;
       --accent:#0ea5e9; --shadow:0 8px 30px rgba(2,6,23,0.08);
 
       /* 夏日绿叶 + 树干 */
@@ -57,7 +57,7 @@
     #drawer a:hover{background:var(--muted)}
 
     .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center;padding:42px 0}
-    .hero-card{position:relative; /* 使章节内画布可定位 */ background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:22px;box-shadow:var(--shadow);overflow:hidden}
+    .hero-card{position:relative; background:var(--card);border:1px solid var(--muted);border-radius:18px;padding:22px;box-shadow:var(--shadow);overflow:hidden}
     .grid{display:grid;gap:20px}
     @media (min-width:901px){.grid-3{grid-template-columns:repeat(3,1fr)} }
     @media (max-width:900px){.hero{grid-template-columns:1fr} }
@@ -84,20 +84,10 @@
 
     /* 层次：主内容 1；章节内画布 0（在内容背景）；前景猫 3；头部 20 */
     main, footer { position: relative; z-index: 1; }
-    /* 背景树干（少量） */
     #bgcanvas { position: fixed; inset: 0; z-index: 0; pointer-events:none; display:block; }
-
-    /* 章节内局部画布（叶子真正“融入”每个区块） */
-    .section-leaves{
-      position:absolute; inset:0; z-index:-1; pointer-events:none; display:block;
-      /* 让叶子与卡片底色自然融合 */
-      mix-blend-mode: multiply; opacity:.85;
-    }
-
-    /* 前景画布：小橘猫在内容之上 */
+    .section-leaves{ position:absolute; inset:0; z-index:-1; pointer-events:none; display:block; mix-blend-mode: multiply; opacity:.85; }
     #fgcanvas { position: fixed; inset: 0; z-index: 3; pointer-events:none; display:block; }
 
-    /* 绿色自定义光标（仅初始化成功后隐藏系统光标） */
     body.use-custom-cursor{ cursor: none; }
     .cursor-dot, .cursor-ring{
       position: fixed; top:0; left:0; transform: translate(-50%,-50%);
@@ -123,7 +113,6 @@
       100%{ transform: translate(-50%,-50%) scale(1.6); box-shadow: 0 0 0 0 rgba(34,197,94,0), inset 0 0 60px rgba(34,197,94,.25); }
     }
 
-    /* 猫靠近页面元素时的融合效果 */
     .cat-near{
       transform: translateY(-2px) scale(1.02);
       box-shadow: 0 8px 26px rgba(0,0,0,.08), 0 0 0 2px rgba(34,197,94,.18);
@@ -135,9 +124,83 @@
       .cursor-dot,.cursor-ring{ display:none !important; }
       body{ cursor:auto !important; }
     }
+
+    /* ===================== 开场动画覆层（丛林+狂风+科技字+打字机） ===================== */
+    body.splash-lock { overflow:hidden; }
+    #splash-intro{
+      position:fixed; inset:0; z-index:99999; display:grid; place-items:center;
+      background: radial-gradient(1400px 900px at 20% 10%, rgba(16,185,129,.06), transparent 60%),
+                  radial-gradient(1400px 900px at 80% 90%, rgba(59,130,246,.08), transparent 60%),
+                  #030712;
+      color:#e5e7eb; transition: opacity .9s ease, visibility .9s ease;
+    }
+    #splash-intro.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+
+    #splash-layer, #wind-layer{
+      position:absolute; inset:0; display:block; pointer-events:none;
+    }
+    #splash-layer{ z-index:0; }
+    #wind-layer{ z-index:1; }
+
+    .splash-text{
+      position:relative; z-index:2; text-align:center; user-select:none;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "JetBrains Mono", monospace;
+      letter-spacing:.6px; padding:0 16px;
+    }
+    .splash-title{
+      font-weight:900; font-size:clamp(26px, 6vw, 56px);
+      text-transform:uppercase;
+      text-shadow: 0 0 6px rgba(99,102,241,.9),
+                   0 0 18px rgba(59,130,246,.75),
+                   0 0 36px rgba(16,185,129,.55);
+      filter: drop-shadow(0 4px 16px rgba(2,6,23,.45));
+      min-height: 1.4em;
+    }
+    /* 打字机光标 */
+    .caret{
+      display:inline-block; width:0.8ch; margin-left:2px;
+      border-right: 2px solid #22d3ee;
+      filter: drop-shadow(0 0 8px rgba(34,211,238,.9));
+      animation: blink .9s steps(1,end) infinite;
+      vertical-align: -3px;
+    }
+    @keyframes blink{ 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+    .splash-sub{ margin-top:10px; font-size:clamp(12px, 2.6vw, 16px); opacity:.75; }
+
+    /* 右下角 skip 按钮（唯一跳过入口） */
+    #skip-btn{
+      position: fixed; right: 18px; bottom: 18px; z-index: 3;
+      padding: 10px 14px; border-radius: 999px; font-weight:600;
+      background: rgba(2,6,23,.6); color:#e5e7eb; border:1px solid rgba(148,163,184,.35);
+      backdrop-filter: blur(6px) saturate(1.1);
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+      cursor: pointer;
+      transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease;
+    }
+    #skip-btn:hover{ transform: translateY(-1px); background: rgba(2,6,23,.72); }
+    #skip-btn:active{ transform: translateY(0); }
+
+    @media (prefers-reduced-motion: reduce){
+      .splash-title{ text-shadow:none; filter:none; }
+      .caret{ animation: blink 1.2s steps(1,end) infinite; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- ============= 开场动画覆层（新增） ============= -->
+  <div id="splash-intro" role="dialog" aria-label="intro animation">
+    <canvas id="splash-layer"></canvas>
+    <canvas id="wind-layer"></canvas>
+    <div class="splash-text">
+      <div class="splash-title">
+        <span id="type-target"></span><span class="caret" aria-hidden="true"></span>
+      </div>
+      <div class="splash-sub">Loading jungle · rendering wind fields…</div>
+    </div>
+    <button id="skip-btn" type="button" aria-label="skip intro">Skip ▸</button>
+  </div>
 
   <!-- 背景树干（轻量） -->
   <canvas id="bgcanvas" aria-hidden="true"></canvas>
@@ -328,19 +391,18 @@
       draw();
     })();
 
-    // ============ 章节内“局部叶子场” （真正与内容融合） ============
+    // ============ 章节内“局部叶子场” ============
     (function(){
       const COLORS = [css('--leaf1'),css('--leaf2'),css('--leaf3'),css('--leaf4'),css('--leaf5'),css('--leaf6')];
 
       class SectionLeaves {
         constructor(host){
-          this.host = host; // 区块元素
+          this.host = host;
           this.canvas = document.createElement('canvas');
           this.canvas.className = 'section-leaves';
-          this.host.prepend(this.canvas); // 放在内容底层
+          this.host.prepend(this.canvas);
           this.ctx = setupCanvas(this.canvas);
           this.leaves = [];
-          this.lastT = 0;
           this.setup();
         }
         setup(){
@@ -350,7 +412,6 @@
           ro.observe(this.host);
         }
         resize(){
-          // 让画布跟随 host 尺寸
           const rect = this.host.getBoundingClientRect();
           this.canvas.style.width = rect.width + 'px';
           this.canvas.style.height = rect.height + 'px';
@@ -358,9 +419,8 @@
         spawn(){
           this.leaves.length = 0;
           const rect = this.host.getBoundingClientRect();
-          // 按面积决定数量，保证“若隐若现”
           const area = Math.max(1, rect.width * rect.height);
-          const base = Math.round(Math.min(18, 6 + area / 80000)); // 上限18片
+          const base = Math.round(Math.min(18, 6 + area / 80000));
           for(let i=0;i<base;i++) this.leaves.push(new Leaf(this));
         }
         updateDraw(t){
@@ -372,68 +432,45 @@
       }
 
       class Leaf{
-        constructor(field){
-          this.field = field;
-          this.reset(true);
-        }
+        constructor(field){ this.field = field; this.reset(true); }
         reset(initial=false){
           const rect = this.field.host.getBoundingClientRect();
-          this.size = 20 + Math.random()*16;                         // 更小
+          this.size = 20 + Math.random()*16;
           this.x = Math.random()*rect.width;
           this.y = initial ? (Math.random()*rect.height*0.6) : (-this.size - Math.random()*40);
-          this.vx = (Math.random()*0.3 - 0.15);                      // 更小水平速度
-          this.vy = 0.35 + Math.random()*0.55;                       // 更慢下落
+          this.vx = (Math.random()*0.3 - 0.15);
+          this.vy = 0.35 + Math.random()*0.55;
           this.baseAngle = Math.random()*Math.PI*2;
-          this.swing = 0.28 + Math.random()*0.42;                    // 更小摆动（“跳小”）
+          this.swing = 0.28 + Math.random()*0.42;
           this.angle = Math.random()*Math.PI*2;
-          this.angularSpeed = (Math.random()*0.008 - 0.004);         // 更小角速度
+          this.angularSpeed = (Math.random()*0.008 - 0.004);
           this.color = COLORS[(Math.random()*COLORS.length)|0];
           this.alpha = 0.85;
         }
         update(t, rect){
           const wind = Math.sin(t*0.001 + this.baseAngle) * this.swing * 0.20;
           this.vx += wind * 0.010;
-
-          // 限速
           const MAX_SPEED = 1.5;
           const speed = Math.hypot(this.vx, this.vy);
           if (speed > MAX_SPEED){ const s = MAX_SPEED / speed; this.vx*=s; this.vy*=s; }
-
-          this.x += this.vx;
-          this.y += this.vy;
-          this.angle += this.angularSpeed;
-
-          // 出界：在该区块内部循环
-          if (this.y > rect.height + this.size*1.2 || this.x < -60 || this.x > rect.width + 60){
-            this.reset(false);
-          }
+          this.x += this.vx; this.y += this.vy; this.angle += this.angularSpeed;
+          if (this.y > rect.height + this.size*1.2 || this.x < -60 || this.x > rect.width + 60){ this.reset(false); }
         }
         draw(ctx){
-          ctx.save();
-          ctx.globalAlpha = this.alpha;
-          ctx.translate(this.x, this.y);
-          ctx.rotate(this.angle);
-          ctx.fillStyle = this.color;
-          ctx.beginPath();
+          ctx.save(); ctx.globalAlpha = this.alpha; ctx.translate(this.x, this.y); ctx.rotate(this.angle);
+          ctx.fillStyle = this.color; ctx.beginPath();
           ctx.ellipse(0, 0, this.size*0.44, this.size*0.85, 0, 0, Math.PI*2);
-          ctx.fill();
-          ctx.restore();
+          ctx.fill(); ctx.restore();
         }
       }
 
-      // 为标记 data-leaves="true" 的元素创建“局部叶子场”
       const hosts = Array.from(document.querySelectorAll('[data-leaves="true"]'));
       const fields = hosts.map(h => new SectionLeaves(h));
-
-      // 单一 RAF 驱动所有区块的叶子
-      function loop(t){
-        for(const f of fields) f.updateDraw(t||0);
-        requestAnimationFrame(loop);
-      }
+      function loop(t){ for(const f of fields) f.updateDraw(t||0); requestAnimationFrame(loop); }
       loop();
     })();
 
-    // ============ 前景：小橘猫（靠近鼠标会停下“蹭一蹭”） ============
+    // ============ 前景：小橘猫 ============
     (function(){
       const fg = document.getElementById('fgcanvas');
       const ctx = fg.getContext('2d');
@@ -449,7 +486,6 @@
       window.addEventListener('resize', resize, {passive:true});
       resize();
 
-      // 与内容融合：猫靠近时高亮这些元素
       const mergeSelectors = ['.btn','a[href]','img','.card','header nav a','.hero-card'];
       const mergeEls = Array.from(document.querySelectorAll(mergeSelectors.join(',')));
 
@@ -462,7 +498,7 @@
         accel: 0.20,
         friction: 0.90,
         angle: 0,
-        state: 'chase',            // 'chase' | 'cuddle'
+        state: 'chase',
         cuddleRadius: 64,
         cuddleUntil: 0,
       };
@@ -551,19 +587,11 @@
         }
 
         ctx.save();
-        ctx.translate(s*0.55 + headShiftX, -s*0.05 + headNod);
+        ctx.translate(s*0.55, -s*0.05);
         ctx.fillStyle = orange;
         ctx.beginPath();
         ctx.ellipse(0, 0, s*0.36, s*0.3, 0, 0, Math.PI*2);
         ctx.fill();
-
-        ctx.fillStyle = orangeDeep;
-        ctx.beginPath(); ctx.moveTo(-s*0.18, -s*0.22); ctx.lineTo(-s*0.02, -s*0.36); ctx.lineTo(0, -s*0.18); ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(s*0.08, -s*0.22);  ctx.lineTo(s*0.22, -s*0.36); ctx.lineTo(s*0.18, -s*0.16); ctx.closePath(); ctx.fill();
-
-        ctx.fillStyle = earPink;
-        ctx.beginPath(); ctx.moveTo(-s*0.12, -s*0.22); ctx.lineTo(-s*0.02, -s*0.30); ctx.lineTo(-s*0.02, -s*0.18); ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(s*0.12, -s*0.22);  ctx.lineTo(s*0.20, -s*0.30); ctx.lineTo(s*0.16, -s*0.18); ctx.closePath(); ctx.fill();
 
         ctx.fillStyle = eye;
         if (CAT.state === 'cuddle'){
@@ -580,13 +608,7 @@
         ctx.fillStyle = '#ef4444';
         ctx.beginPath(); ctx.ellipse(s*0.03, s*0.02, s*0.02, s*0.015, 0, 0, Math.PI*2); ctx.fill();
 
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
-        for (let i=-1;i<=1;i++){
-          ctx.beginPath(); ctx.moveTo(-s*0.02, s*0.02 + i*4); ctx.lineTo(-s*0.13, s*0.0 + i*4); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(s*0.08, s*0.02 + i*4);  ctx.lineTo(s*0.19, s*0.0 + i*4); ctx.stroke();
-        }
-
-        ctx.restore(); // 头
+        ctx.restore();
         ctx.restore();
       }
 
@@ -640,6 +662,208 @@
       if(openBtn && drawer){ openBtn.addEventListener('click', ()=>{ drawer.style.display='block'; }); }
       if(closeBtn && drawer){ closeBtn.addEventListener('click', ()=>{ drawer.style.display='none'; }); }
       drawer?.addEventListener('click', (e)=>{ if(e.target===drawer) drawer.style.display='none'; });
+    })();
+
+    /* ==================== 开场动画逻辑（丛林+狂风+打字机） ==================== */
+    (function(){
+      const SPLASH_DURATION = 10000; // 10s
+      const TYPE_DELAY_MS   = 1500;  // 开打前等待
+      const TYPE_SPEED_MS   = 38;    // 打字速度（每字符间隔）
+
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration = prefersReduced ? 1200 : SPLASH_DURATION;
+      const typeDelay = prefersReduced ? 300 : TYPE_DELAY_MS;
+      const typeSpeed = prefersReduced ? 10  : TYPE_SPEED_MS;
+
+      const splash = document.getElementById('splash-intro');
+      const jungle = document.getElementById('splash-layer');
+      const wind   = document.getElementById('wind-layer');
+      const typeEl = document.getElementById('type-target');
+      const skipBtn= document.getElementById('skip-btn');
+      if (!splash || !jungle || !wind || !typeEl || !skipBtn) return;
+
+      document.body.classList.add('splash-lock');
+
+      const jctx = jungle.getContext('2d');
+      const wctx = wind.getContext('2d');
+
+      function resize(){
+        const DPR = Math.max(1, Math.min(window.devicePixelRatio||1, 2));
+        for (const c of [jungle, wind]){
+          c.width = Math.floor(window.innerWidth * DPR);
+          c.height = Math.floor(window.innerHeight * DPR);
+          c.style.width = window.innerWidth + 'px';
+          c.style.height = window.innerHeight + 'px';
+        }
+        jctx.setTransform(DPR,0,0,DPR,0,0);
+        wctx.setTransform(DPR,0,0,DPR,0,0);
+      }
+      window.addEventListener('resize', resize, {passive:true}); resize();
+
+      // 丛林与叶子
+      const leaves = [];
+      const vines = [];
+      const COLORS = [css('--leaf1'),css('--leaf2'),css('--leaf3'),css('--leaf4'),css('--leaf5'),css('--leaf6')];
+      function rand(a,b){ return a + Math.random()*(b-a); }
+
+      function spawnVines(){
+        vines.length = 0;
+        const count = Math.round(Math.max(6, Math.min(18, window.innerWidth/120)));
+        for (let i=0;i<count;i++){
+          vines.push({
+            x: rand(-80, window.innerWidth+80),
+            y: rand(-60, 60),
+            len: rand(window.innerHeight*0.5, window.innerHeight*0.9),
+            wiggle: rand(0.6, 1.2),
+            thick: rand(2, 4),
+            hue: rand(90, 150)
+          });
+        }
+      }
+      function spawnLeaves(){
+        leaves.length = 0;
+        const density = Math.round(Math.max(120, Math.min(260, window.innerWidth*window.innerHeight/40_000)));
+        for (let i=0;i<density;i++){
+          leaves.push({
+            x: Math.random()*window.innerWidth,
+            y: Math.random()*window.innerHeight,
+            r: rand(6, 18),
+            vx: rand(-0.2, 0.2),
+            vy: rand(0.1, 0.6),
+            sway: rand(0.2, 0.8),
+            a: rand(0, Math.PI*2),
+            rot: rand(-0.02, 0.02),
+            c: COLORS[(Math.random()*COLORS.length)|0],
+            alpha: rand(0.6, 0.95)
+          });
+        }
+      }
+      spawnVines(); spawnLeaves();
+
+      // 狂风控制
+      let windPower = 0;      // 0~1
+      let gustTarget = 0;
+      const GUST_START = Math.max(2000, duration*0.55);
+      const GUST_END   = Math.min(duration-1800, GUST_START+1800);
+
+      function scheduleGust(t){
+        if (t > GUST_START && t < GUST_END){
+          gustTarget = 1;
+        } else if (t >= GUST_END){
+          gustTarget = 0;
+        }
+        windPower += (gustTarget - windPower)*0.03;
+      }
+
+      function drawVines(t){
+        jctx.save();
+        for (const v of vines){
+          jctx.strokeStyle = `hsl(${v.hue} 40% 20% / 0.85)`;
+          jctx.lineWidth = v.thick;
+          jctx.beginPath();
+          jctx.moveTo(v.x, v.y);
+          const seg = 10;
+          for (let i=1;i<=seg;i++){
+            const p = i/seg;
+            const sway = Math.sin(t*0.001 + p*8 + v.x*0.01) * v.wiggle * (1+windPower*1.6);
+            const xx = v.x + sway*30*p + windPower*20*p;
+            const yy = v.y + v.len*p;
+            jctx.lineTo(xx, yy);
+          }
+          jctx.stroke();
+        }
+        jctx.restore();
+      }
+
+      function drawLeaf(l){
+        jctx.save();
+        jctx.globalAlpha = l.alpha;
+        jctx.translate(l.x, l.y);
+        jctx.rotate(l.a);
+        jctx.fillStyle = l.c;
+        jctx.beginPath();
+        jctx.ellipse(0,0,l.r*0.6,l.r,0,0,Math.PI*2);
+        jctx.fill();
+        jctx.restore();
+      }
+      function updateLeaves(){
+        for (const L of leaves){
+          L.vx += windPower*0.35 + Math.sin(L.a*3)*0.02;
+          L.vy += Math.sin(L.a*2)*0.005;
+          L.x += L.vx;
+          L.y += L.vy;
+          L.a += L.rot + windPower*0.02;
+          if (L.x > window.innerWidth + 40) L.x = -40;
+          if (L.y > window.innerHeight + 20){ L.y = -20; L.x = rand(-20, window.innerWidth+20); }
+        }
+      }
+      function drawWindTrails(){
+        const lines = Math.round(6 + windPower*22);
+        wctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+        wctx.save();
+        wctx.globalAlpha = 0.15 + windPower*0.25;
+        wctx.lineWidth = 2 + windPower*2;
+        wctx.strokeStyle = `rgba(125,211,252,${0.35 + windPower*0.4})`;
+        for (let i=0;i<lines;i++){
+          const y = Math.random()*window.innerHeight;
+          const len = 80 + Math.random()*240 * (1+windPower);
+          wctx.beginPath();
+          wctx.moveTo(-50, y + Math.sin(y*0.02 + performance.now()*0.002)*6);
+          wctx.quadraticCurveTo(len*0.3, y-10, len, y+5);
+          wctx.stroke();
+        }
+        wctx.restore();
+      }
+
+      let start = performance.now();
+      function loop(now){
+        const t = now - start;
+        scheduleGust(t);
+
+        jctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+        drawVines(now);
+        updateLeaves();
+        for (const L of leaves) drawLeaf(L);
+
+        drawWindTrails();
+
+        if (!splash.classList.contains('hidden')) requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+
+      // 打字机效果 ---------------------------------------------------------
+      const FULL_TEXT = "Welcome to WangRuxin personal page";
+      function typeWriter(text, el, startDelay=0, speed=36){
+        el.textContent = "";
+        const beginAt = performance.now() + startDelay;
+        let idx = 0;
+        function step(now){
+          if (now < beginAt){ requestAnimationFrame(step); return; }
+          if (idx <= text.length){
+            el.textContent = text.slice(0, idx);
+            idx++;
+            setTimeout(()=>requestAnimationFrame(step), speed);
+          }
+        }
+        requestAnimationFrame(step);
+      }
+      // 稍等一会儿再开始打字
+      setTimeout(()=> typeWriter(FULL_TEXT, typeEl, 0, typeSpeed), typeDelay);
+
+      // 结束与 Skip（只有按钮能跳） ----------------------------------------
+      function hideSplash(){
+        if (splash.classList.contains('hidden')) return;
+        splash.classList.add('hidden');
+        document.body.classList.remove('splash-lock');
+        setTimeout(()=> splash.remove(), 900);
+      }
+      const timer = setTimeout(hideSplash, duration);
+      skipBtn.addEventListener('click', () => {
+        clearTimeout(timer);
+        hideSplash();
+      }, {once:true});
+
+      // 禁止其他方式跳过（不绑定键盘/背景点击）
     })();
   </script>
 </body>
