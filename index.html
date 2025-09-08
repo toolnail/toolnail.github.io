@@ -6,6 +6,7 @@
   <title>WangRuxin | Personal Page</title>
   <meta name="description" content="WangRuxin personal page" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧑‍💻</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     :root{
       --bg:#e8f5e9; --fg:#0f172a; --sub:#475569; --muted:#e2e8f0; --card:#f8fafc; --link:#2563eb;
@@ -83,8 +84,15 @@
     .muted{color:var(--sub)}
     .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--muted);border-radius:10px;padding:8px 12px}
     .btn:hover{background:var(--muted)}
-    .btn svg{width:16px;height:16px;fill:var(--fg);vertical-align:middle}
-    .btn:hover svg{fill:var(--accent)}
+    .btn svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--fg);
+      transition: fill 0.2s ease;
+    }
+    .btn:hover svg {
+      fill: var(--accent);
+    }
     .post-meta{font-size:13px;color:var(--sub)}
     .section-title{display:flex;align-items:center;gap:12px}
     .section-title .line{height:1px;flex:1;background:var(--muted)}
@@ -248,21 +256,15 @@
           <p class="muted">I am currently pursuing a Ph.D. degree at Shanghai Jiao Tong University.</p>
           <div class="wrap" style="margin-top:14px">
             <a class="btn" href="https://orcid.org/0009-0007-7156-2173/print">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v2H8V8zm0 3h8v2H8v-2zm0 3h5v2H8v-2z"/>
-              </svg>
+              <i class="fas fa-file-download" aria-hidden="true"></i>
               Download CV
             </a>
             <a class="btn" href="https://scholar.google.com/citations?hl=zh-CN&user=GtrRzRkAAAAJ" target="_blank" rel="noreferrer">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 2a10 10 0 00-3.16 19.44l1.09-1.85A8 8 0 1112 4a7.93 7.93 0 014.24 1.24l1.44-1.44A9.95 9.95 0 0012 2zm0 14a4 4 0 100-8 4 4 0 000 8zm-2-4a2 2 0 114 0 2 2 0 01-4 0z"/>
-              </svg>
+              <i class="fas fa-graduation-cap" aria-hidden="true"></i>
               Google Scholar
             </a>
             <a class="btn" href="https://github.com/toolnail" target="_blank" rel="noreferrer">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2 0 1.8 1.2 1.8 1.2 1 1.7 2.7 1.2 3.3.9.1-.7.4-1.2.7-1.5-2.4-.3-4.9-1.2-4.9-5.4 0-1.2.4-2.2 1.2-3-.1-.3-.5-1.4.1-2.9 0 0 .9-.3 2.9 1.1a10 10 0 015.2 0c2-1.4 2.9-1.1 2.9-1.1.6 1.5.2 2.6.1 2.9.8.8 1.2 1.8 1.2 3 0 4.2-2.5 5.1-4.9 5.4.4.3.7.9.7 1.8v2.7c0 .3.2.7.8.6A12 12 0 0012 .3z"/>
-              </svg>
+              <i class="fab fa-github" aria-hidden="true"></i>
               GitHub
             </a>
           </div>
@@ -509,7 +511,6 @@
         }
         ctx.fillStyle = '#ef4444';
         ctx.beginPath(); ctx.ellipse(s*0.03, s*0.02, s*0.02, s*0.015, 0, 0, Math.PI*2); ctx.fill();
-        ctx.restore();
         ctx.restore();
       }
       function applyMergeEffects(){
