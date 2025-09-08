@@ -164,6 +164,19 @@
       transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease; }
     #skip-btn:hover{ transform: translateY(-1px); background: rgba(2,6,23,.72); }
     #skip-btn:active{ transform: translateY(0); }
+    .hero-img {
+      width: 100%;
+      max-width: 150px;
+      height: auto;
+      border-radius: 12px;
+      margin-top: 8px;
+      border: 1px solid var(--muted);
+    }
+    @media (max-width: 900px) {
+      .hero-img {
+        max-width: 250px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -224,7 +237,7 @@
         </div>
       </div>
       <div class="hero-card">
-        <img src="https://toolnail.github.io/personal_photo_beijing.jpg" alt="cover" style="width:100%;height:auto;border-radius:12px;margin-top:8px;border:1px solid var(--muted)"/>
+        <img src="https://toolnail.github.io/personal_photo_beijing.jpg" alt="cover" class="hero-img"/>
       </div>
     </section>
     <section id="about">
@@ -355,60 +368,6 @@
         });
       }
     })();
-    /*(function(){
-      const bg = document.getElementById('bgcanvas');
-      const ctx = bg.getContext('2d');
-      function resize(){
-        const DPR = Math.max(1, Math.min(window.devicePixelRatio||1, 2));
-        bg.width = Math.floor(window.innerWidth * DPR);
-        bg.height = Math.floor(window.innerHeight * DPR);
-        bg.style.width = window.innerWidth + 'px';
-        bg.style.height = window.innerHeight + 'px';
-        ctx.setTransform(DPR,0,0,DPR,0,0);
-      }
-      window.addEventListener('resize', resize, {passive:true});
-      resize();
-      const TREE_SIDE_MAX_W = 180;
-      function drawTrunk({x, baseY, trunkW, height, side}){
-        const g = ctx.createLinearGradient(x, baseY-height, x, baseY);
-        g.addColorStop(0, css('--trunkLight')); g.addColorStop(0.5, css('--trunkMid')); g.addColorStop(1, css('--trunkDark'));
-        ctx.save(); ctx.fillStyle = g; ctx.beginPath();
-        const topX = x + (side==='left' ? -trunkW*0.25 : trunkW*0.25), topW = trunkW*0.5;
-        ctx.moveTo(x - trunkW*0.5, baseY);
-        ctx.quadraticCurveTo(x - trunkW*0.45, baseY - height*0.5, topX - topW*0.5, baseY - height);
-        ctx.lineTo(topX + topW*0.5, baseY - height);
-        ctx.quadraticCurveTo(x + trunkW*0.45, baseY - height*0.5, x + trunkW*0.5, baseY);
-        ctx.closePath(); ctx.fill(); ctx.restore();
-      }
-      function drawSideFoliage(sideW){
-        const L2 = css('--treeMid'), L3 = css('--treeDeep');
-        const drawCluster = (cx, cy, r, alpha, color)=>{
-          ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.beginPath();
-          for(let i=0;i<7;i++){ const t=(i/7)*Math.PI*2; ctx.ellipse(cx + Math.cos(t)*r*0.9, cy + Math.sin(t)*r*0.7, r*0.65, r, 0, 0, Math.PI*2); }
-          ctx.fill(); ctx.restore();
-        };
-        const h = Math.min(0.98*window.innerHeight, 760);
-        drawCluster(sideW*0.45, window.innerHeight - h + 80, sideW*0.8, 0.20, L3);
-        drawCluster(sideW*0.55, window.innerHeight - h + 140, sideW*0.7, 0.14, L2);
-        drawCluster(window.innerWidth - sideW*0.45, window.innerHeight - h + 100, sideW*0.8, 0.20, L3);
-        drawCluster(window.innerWidth - sideW*0.55, window.innerHeight - h + 160, sideW*0.7, 0.14, L2);
-      }
-      function draw(){
-        ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-        const vw = window.innerWidth;
-        const sideW = Math.min(TREE_SIDE_MAX_W, Math.max(110, vw*0.12));
-        if (vw >= 760){
-          const height = Math.min(0.98*window.innerHeight, 760);
-          const baseY = window.innerHeight + 60;
-          drawTrunk({x: sideW*0.55, baseY, trunkW: sideW*0.38, height, side:'left'});
-          drawTrunk({x: window.innerWidth - sideW*0.55, baseY, trunkW: sideW*0.38, height, side:'right'});
-          drawSideFoliage(sideW);
-        }
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
-    */
     (function(){
       const fg = document.getElementById('fgcanvas');
       const ctx = fg.getContext('2d');
