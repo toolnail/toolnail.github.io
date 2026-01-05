@@ -3,24 +3,24 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Ruxin Wang | Academic Profile</title>
-    <meta name="description" content="Ruxin Wang academic profile and publications" />
+    <title>Ruxin Wang | Personal Page</title>
+    <meta name="description" content="Ruxin Wang personal page" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>W</text></svg>" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>  
     :root {
-            --bg: #f7f6f2;
+            --bg: #f6f4ef;
             --fg: #0f172a;
-            --sub: #4b5563;
-            --muted: #e7e5e4;
+            --sub: #475569;
+            --muted: #e6e2d7;
             --card: #ffffff;
-            --link: #0f4c5c;
-            --accent: #0f4c5c;
-            --accent-2: #b08968;
-            --shadow: 0 20px 55px rgba(15,23,42,0.08);
+            --link: #0f766e;
+            --accent: #0f766e;
+            --accent-2: #c7a26a;
+            --shadow: 0 18px 50px rgba(15,23,42,0.08);
             --leaf1: #c49a6c;
             --leaf2: #b07a42;
             --leaf3: #d1a064;
@@ -32,8 +32,8 @@
             --treeLight: #c9e5d1;
             --treeMid: #8bc7a0;
             --treeDeep: #3f8f6b;
-            --cursor-dot: #0f4c5c;
-            --cursor-ring: #0f4c5c;
+            --cursor-dot: #0f766e;
+            --cursor-ring: #0f766e;
         }
         @media (prefers-color-scheme: dark) {
             :root {
@@ -61,7 +61,7 @@
             padding: 0;
             background: var(--bg);
             color: var(--fg);
-            font: 16px/1.7 "Manrope", "PingFang SC", "Noto Sans CJK SC", "Microsoft Yahei", sans-serif;
+            font: 16px/1.7 "Source Sans 3", "PingFang SC", "Noto Sans CJK SC", "Microsoft Yahei", sans-serif;
         }
         body::before {
             content: "";
@@ -79,14 +79,14 @@
             inset: 0;
             background-image: radial-gradient(color-mix(in oklab, var(--fg) 12%, transparent) 0.8px, transparent 0.8px);
             background-size: 18px 18px;
-            opacity: 0.25;
+            opacity: 0.35;
             z-index: 0;
             pointer-events: none;
         }
         a { color: var(--link); text-decoration: none }
         a:hover { text-decoration: underline }
-        .container { max-width: 1080px; margin: 0 auto; padding: 0 22px }
-        header { position: sticky; top: 0; z-index: 20; background: color-mix(in oklab, var(--bg) 90%, transparent); backdrop-filter: saturate(1.1) blur(12px); border-bottom: 1px solid var(--muted) }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px }
+        header { position: sticky; top: 0; z-index: 20; background: color-mix(in oklab, var(--bg) 88%, transparent); backdrop-filter: saturate(1.15) blur(12px); border-bottom: 1px solid var(--muted) }
         nav { display: flex; align-items: center; justify-content: space-between; height: 64px }
         .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.3px }
         .brand img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--muted) }
@@ -103,28 +103,28 @@
         #drawer .panel { position: absolute; right: 0; top: 0; height: 100%; width: 78%; max-width: 320px; background: var(--bg); padding: 22px; border-left: 1px solid var(--muted) }
         #drawer a { display: block; padding: 10px 6px; border-radius: 8px }
         #drawer a:hover { background: var(--muted) }
-        .hero { padding: 64px 0 44px }
+        .hero { padding: 56px 0 40px }
         .hero-card {
             position: relative;
             background: linear-gradient(135deg, color-mix(in oklab, var(--card) 92%, #ffffff), var(--card));
             border: 1px solid var(--muted);
             border-radius: 22px;
-            padding: 32px;
+            padding: 28px;
             box-shadow: var(--shadow);
             overflow: hidden;
             display: flex;
             align-items: center;
-            gap: 28px;
+            gap: 24px;
         }
         .grid { display: grid; gap: 20px }
         @media (min-width: 901px) { .grid-3 { grid-template-columns: repeat(3, 1fr) } }
         @media (max-width: 900px) {
             .hero-card { flex-direction: column; align-items: flex-start }
         }
-        section { padding: 38px 0; position: relative; scroll-margin-top: 80px }
-        h1, h2 { line-height: 1.15; margin: 0; font-family: "Fraunces", "Manrope", serif }
+        section { padding: 36px 0; position: relative; scroll-margin-top: 80px }
+        h1, h2 { line-height: 1.2; margin: 0; font-family: "Playfair Display", "Source Sans 3", serif }
         h2 { font-size: clamp(22px, 3vw, 28px); margin-bottom: 10px }
-        .card { position: relative; background: var(--card); border: 1px solid var(--muted); border-radius: 18px; padding: 22px; box-shadow: var(--shadow); overflow: hidden }
+        .card { position: relative; background: var(--card); border: 1px solid var(--muted); border-radius: 18px; padding: 20px; box-shadow: var(--shadow); overflow: hidden }
         .list { list-style: none; margin: 0; padding: 0 }
         .list li { padding: 14px 0; border-bottom: 1px dashed var(--muted) }
         .list li:last-child { border-bottom: none }
@@ -152,7 +152,6 @@
         }
         .btn svg { width: 16px; height: 16px; fill: var(--fg); vertical-align: middle }
         .btn:hover svg { fill: var(--accent) }
-        .btn img { width: 16px; height: 16px; vertical-align: middle }
         .post-meta { font-size: 13px; color: var(--sub) }
         .section-title { display: flex; align-items: center; gap: 12px }
         .section-title .line { height: 1px; flex: 1; background: color-mix(in oklab, var(--muted) 70%, transparent) }
@@ -288,9 +287,9 @@
         .hero-img {
             width: 150px;
             height: auto;
-            border-radius: 14px;
-            border: 1px solid color-mix(in oklab, var(--muted) 90%, transparent);
-            box-shadow: 0 12px 26px rgba(15,23,42,0.14);
+            border-radius: 12px;
+            border: 1px solid var(--muted);
+            box-shadow: 0 10px 24px rgba(15,23,42,0.12);
         }
         @media (max-width: 900px) {
             .hero-img {
@@ -298,89 +297,18 @@
                 max-width: 250px;
             }
         }
-        .hero-kicker {
-            font-size: 12px;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            color: var(--sub);
-            margin: 0 0 10px;
-        }
         .hero-title {
-            font-size: clamp(30px, 4.4vw, 44px);
-            letter-spacing: 0.2px;
+            font-size: clamp(28px, 4vw, 40px);
+            letter-spacing: 0.4px;
         }
         .hero-name {
             color: var(--accent-2);
             font-weight: 700;
         }
         .hero-sub {
-            margin: 12px 0 0;
+            margin: 10px 0 0;
             color: var(--sub);
             font-size: 16px;
-        }
-        .hero-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 16px;
-            color: var(--sub);
-            font-size: 14px;
-        }
-        .meta-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: color-mix(in oklab, var(--muted) 85%, transparent);
-        }
-        .section-lead {
-            margin: 0 0 16px;
-            color: var(--sub);
-        }
-        .meta-grid {
-            display: grid;
-            gap: 14px;
-        }
-        @media (min-width: 720px) {
-            .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        }
-        .meta-card {
-            border-radius: 14px;
-            border: 1px solid var(--muted);
-            padding: 14px 16px;
-            background: color-mix(in oklab, var(--card) 96%, var(--muted) 4%);
-        }
-        .meta-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--sub);
-            margin-bottom: 6px;
-        }
-        .meta-value { font-weight: 600; color: var(--fg) }
-        .pub-item {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 14px;
-            align-items: start;
-        }
-        .pub-title {
-            display: inline-block;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--fg);
-        }
-        .pub-meta { margin-top: 6px; color: var(--sub) }
-        .contact-grid {
-            display: grid;
-            gap: 12px;
-        }
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
         }
     </style>
 </head>
@@ -392,7 +320,7 @@
             <div class="splash-title">
                 <span id="type-target"></span><span class="caret" aria-hidden="true"></span>
             </div>
-            <div class="splash-sub">Research · Publications · Contact</div>
+            <div class="splash-sub">Be someone with a mind of their own</div>
         </div>
         <button id="skip-btn" type="button" aria-label="skip intro">Skip</button>
     </div>
@@ -434,25 +362,20 @@
             <div class="hero-card">
                 <img src="https://toolnail.github.io/personal_photo_beijing.jpg" alt="cover" class="hero-img" />
                 <div>
-                  <p class="hero-kicker">Academic Profile</p>
-                  <h1 class="hero-title"><span class="hero-name">Ruxin Wang</span></h1>
+                  <h1 class="hero-title">Hello, I am <span class="hero-name">Ruxin Wang</span></h1>
                   <p class="hero-sub">Ph.D. student at Shanghai Jiao Tong University Global College</p>
-                  <div class="hero-meta">
-                      <span class="meta-item"><i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Ph.D. Program</span>
-                      <span class="meta-item"><i class="fa-solid fa-signal" aria-hidden="true"></i> Communication Networks</span>
-                  </div>
-                    <div class="wrap" style="margin-top: 18px">
+                    <div class="wrap" style="margin-top: 14px">
                     <a class="btn" href="https://orcid.org/0009-0007-7156-2173" target="_blank" rel="noreferrer">
-                        <img src="orcid.logo.icon.svg" alt="ORCID">
+                        <img src="orcid.logo.icon.svg" alt="ORCID" style="width:16px; height:16px; vertical-align:middle; margin-right:6px;">
                         ORCID
                     </a>
 
                         <a class="btn" href="https://scholar.google.com/citations?hl=zh-CN&user=GtrRzRkAAAAJ" target="_blank" rel="noreferrer">
-                            <img src="Google_Scholar_logo.svg" alt="Google Scholar">
+                            <img src="Google_Scholar_logo.svg" alt="Google Scholar" style="width:16px; height:16px; vertical-align:middle; margin-right:6px;">
                             Google Scholar
                         </a>
                         <a class="btn" href="https://github.com/toolnail" target="_blank" rel="noreferrer">
-                             <img src="github-mark.svg" alt="GitHub">
+                             <img src="github-mark.svg" alt="GitHub" style="width:16px; height:16px; vertical-align:middle; margin-right:6px;">
                             GitHub
                         </a>
                     </div>
@@ -462,34 +385,24 @@
         <section id="about">
             <div class="section-title"><h2>About Me</h2><div class="line"></div></div>
             <div class="card">
-                <p class="section-lead">I am currently pursuing a Ph.D. degree at <a href="https://www.ji.sjtu.edu.cn/" target="_blank">Shanghai Jiao Tong University Global College</a>. Prior to that, I received the B.Eng. degree in Telecommunication Engineering from <a href="https://www.xidian.edu.cn/" target="_blank">Xidian University</a> in 2025.</p>
-                <div class="meta-grid">
-                    <div class="meta-card">
-                        <div class="meta-label">Current</div>
-                        <div class="meta-value">Ph.D. Student, Shanghai Jiao Tong University</div>
-                    </div>
-                    <div class="meta-card">
-                        <div class="meta-label">Education</div>
-                        <div class="meta-value">B.Eng. Telecommunication Engineering, Xidian University (2025)</div>
-                    </div>
-                </div>
+                <p>I am currently pursuing a Ph.D. degree at <a href="https://www.ji.sjtu.edu.cn/" target="_blank">Shanghai Jiao Tong University Global College</a>. Prior to that, I received the B.Eng. degree in Telecommunication Engineering from <a href="https://www.xidian.edu.cn/" target="_blank">Xidian University</a> in 2025.</p>
             </div>
         </section>
         <section id="publications">
             <div class="section-title"><h2>Publications</h2><div class="line"></div></div>
             <div class="card">
                 <ul class="list">
-                    <li class="pub-item">
-                        <img src="pdf.svg" alt="PDF" style="width:24px; height:24px; margin-top:2px;">
-                        <div>
-                        <a class="pub-title" href="https://ieeexplore.ieee.org/abstract/document/11142870" target="_blank">
+                    <li>
+                        <img src="pdf.svg" alt="PDF" style="width:24px; height:24px; margin-right:6px; vertical-align:middle;">
+                        <a href="https://ieeexplore.ieee.org/abstract/document/11142870" target="_blank" style="font-size:16px;">
                            Progressive Integrated Access and Backhaul Network Augmentation
                         </a>
-                        <div class="pub-meta">
+
+
+                        <div class="post-meta" style="font-size:16px;">
                             Xipeng Zhang; Fei Du; Zhong Liu; Xinyi Chen; 
                             <strong style="font-weight:800;">Ruxin Wang</strong>; Yibo Pi<br>
                             IEEE Communications Letters, 2025
-                        </div>
                         </div>
                     </li>
 
@@ -499,9 +412,7 @@
         <section id="contact">
             <div class="section-title"><h2>Contact</h2><div class="line"></div></div>
             <div class="card">
-                <div class="contact-grid">
-                    <div class="contact-item"><i class="fa-regular fa-envelope" aria-hidden="true"></i> wangruxin@sjtu.edu.cn</div>
-                </div>
+                <p><strong>Email:</strong> wangruxin@sjtu.edu.cn</p>
             </div>
         </section>
     </main>
@@ -512,11 +423,6 @@
     </footer>
     <script>
         document.getElementById('y').textContent = new Date().getFullYear();
-        const SITE_PREFS = {
-            ambient: false,
-            playful: false,
-            splash: true
-        };
         function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
         function setupCanvas(canvas) {
             const ctx = canvas.getContext('2d');
@@ -533,7 +439,6 @@
             return ctx;
         }
         (function() {
-            if (!SITE_PREFS.ambient) return;
             const canvas = document.getElementById("leaves");
             const ctx = canvas.getContext("2d");
             let W, H, DPR;
@@ -611,7 +516,6 @@
             }
         })();
         (function() {
-            if (!SITE_PREFS.playful) return;
             const fg = document.getElementById('fgcanvas');
             const ctx = fg.getContext('2d');
             function resize() {
@@ -748,7 +652,6 @@
             animate(0);
         })();
         (function() {
-            if (!SITE_PREFS.playful) return;
             const ring = document.querySelector('.cursor-ring');
             if (!ring) return;
             const finePointer = window.matchMedia('(pointer: fine)').matches;
@@ -781,12 +684,7 @@
             drawer?.addEventListener('click', (e) => { if (e.target === drawer) drawer.style.display = 'none'; });
         })();
         (function() {
-            if (!SITE_PREFS.splash) {
-                document.getElementById('splash-intro')?.remove();
-                document.body.classList.remove('splash-lock');
-                return;
-            }
-            const SPLASH_DURATION = 6000;
+            const SPLASH_DURATION = 10000;
             const TYPE_DELAY_MS = 1500;
             const TYPE_SPEED_MS = 38;
             const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -928,7 +826,7 @@
                 if (!document.getElementById('splash-intro').classList.contains('hidden')) requestAnimationFrame(loop);
             }
             requestAnimationFrame(loop);
-            const FULL_TEXT = "Welcome to Ruxin Wang's academic page";
+            const FULL_TEXT = "Welcome to WangRuxin personal page";
             function typeWriter(text, el, startDelay = 0, speed = 36) {
                 el.textContent = "";
                 const beginAt = performance.now() + startDelay;
