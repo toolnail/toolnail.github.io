@@ -158,7 +158,56 @@
         main, footer { position: relative; z-index: 1 }
         #bgcanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: block }
         #fgcanvas { position: fixed; top: 0; left: 0; width: 160px; height: 160px; z-index: 3; pointer-events: none; display: block; will-change: transform }
-        #leaves { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: block }
+        #leaves {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            contain: layout paint;
+        }
+        .falling-leaf {
+            position: absolute;
+            top: 0;
+            left: var(--leaf-x);
+            width: var(--leaf-width);
+            height: var(--leaf-height);
+            transform: translate3d(0, -90px, 0);
+            will-change: transform;
+            animation: leaf-fall var(--fall-duration) linear var(--fall-delay) infinite;
+        }
+        .leaf-shape {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--leaf-color);
+            opacity: 0.9;
+            will-change: transform;
+            animation: leaf-sway var(--sway-duration) ease-in-out var(--sway-delay) infinite alternate;
+        }
+        .leaf-shape::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 1px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+        @keyframes leaf-fall {
+            from { transform: translate3d(0, -90px, 0) }
+            to { transform: translate3d(0, calc(100vh + 90px), 0) }
+        }
+        @keyframes leaf-sway {
+            from { transform: translate3d(calc(0px - var(--sway-distance)), 0, 0) rotate(calc(var(--leaf-angle) - 20deg)) }
+            to { transform: translate3d(var(--sway-distance), 0, 0) rotate(calc(var(--leaf-angle) + 20deg)) }
+        }
+        #leaves[data-paused] .falling-leaf,
+        #leaves[data-paused] .leaf-shape { animation-play-state: paused }
+        @media (prefers-reduced-motion: reduce) {
+            .falling-leaf, .leaf-shape { animation: none }
+        }
         @media (prefers-reduced-motion: reduce) {
             #bgcanvas, #fgcanvas, #leaves { display: none !important }
         }
@@ -193,7 +242,7 @@
 <body>
     <canvas id="bgcanvas" aria-hidden="true"></canvas>
     <canvas id="fgcanvas" aria-hidden="true"></canvas>
-    <canvas id="leaves" aria-hidden="true"></canvas>
+    <div id="leaves" aria-hidden="true"></div>
     <header>
         <div class="container">
             <nav>
@@ -287,7 +336,6 @@
     </footer>
     <script>
         document.getElementById('y').textContent = new Date().getFullYear();
-        function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
         // Share one clock, and suspend decorative work while it cannot be seen.
         const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
         const animations = [];
@@ -316,73 +364,43 @@
         document.addEventListener('visibilitychange', syncAnimations);
         motionPreference.addEventListener('change', syncAnimations);
         (function() {
-            const canvas = document.getElementById("leaves");
-            const ctx = canvas.getContext("2d");
-            let DPR;
-            function resize() {
-                // Limit the decorative canvas pixel budget on large, high-DPI screens.
-                DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2,
-                    Math.sqrt(2500000 / (window.innerWidth * window.innerHeight))));
-                canvas.width = Math.floor(window.innerWidth * DPR);
-                canvas.height = Math.floor(window.innerHeight * DPR);
-                canvas.style.width = window.innerWidth + "px";
-                canvas.style.height = window.innerHeight + "px";
-                ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+            const layer = document.getElementById('leaves');
+            const fragment = document.createDocumentFragment();
+            const count = Math.round(36 * Math.max(0.5, Math.min(1, window.innerWidth / 1200)));
+            const travel = window.innerHeight + 180;
+            for (let i = 0; i < count; i++) {
+                const leaf = document.createElement('span');
+                const shape = document.createElement('span');
+                const height = 32 + Math.random() * 36;
+                const duration = travel / (42 + Math.random() * 30);
+                // Stagger the starting phases; recycle only beyond the viewport edges.
+                const phase = (i + Math.random()) / count;
+                leaf.className = 'falling-leaf';
+                shape.className = 'leaf-shape';
+                const properties = {
+                    '--leaf-x': (Math.random() * 100) + '%',
+                    '--leaf-width': (height * 0.55) + 'px',
+                    '--leaf-height': height + 'px',
+                    '--leaf-color': 'var(--leaf' + (1 + Math.floor(Math.random() * 5)) + ')',
+                    '--leaf-angle': (Math.random() * 360) + 'deg',
+                    '--fall-duration': duration + 's',
+                    '--fall-delay': (-phase * duration) + 's',
+                    '--sway-distance': (14 + Math.random() * 22) + 'px',
+                    '--sway-duration': (2.4 + Math.random() * 2.4) + 's',
+                    '--sway-delay': (-Math.random() * 8) + 's',
+                };
+                for (const [name, value] of Object.entries(properties)) leaf.style.setProperty(name, value);
+                leaf.appendChild(shape);
+                fragment.appendChild(leaf);
             }
-            window.addEventListener("resize", resize, { passive: true });
-            resize();
-            const COLORS = [css('--leaf1'), css('--leaf2'), css('--leaf3'), css('--leaf4'), css('--leaf5')];
-            const leaves = [];
-            const BASE_COUNT = 36;
-            const DENSITY = Math.max(0.5, Math.min(1, window.innerWidth / 1200));
-            const leafCount = Math.floor(BASE_COUNT * DENSITY);
-            class Leaf {
-                constructor() { this.reset(true); }
-                reset(initial = false) {
-                    this.size = 16 + Math.random() * 18;
-                    this.x = Math.random() * window.innerWidth;
-                    this.y = initial ? Math.random() * window.innerHeight : -this.size - Math.random() * window.innerHeight * 0.2;
-                    this.speedY = 0.6 + Math.random() * 1.6;
-                    this.swing = 1.2 + Math.random() * 2.0;
-                    this.baseAngle = Math.random() * Math.PI * 2;
-                    this.angle = Math.random() * Math.PI * 2;
-                    this.angularSpeed = (Math.random() * 0.02 - 0.01);
-                    this.color = COLORS[(Math.random() * COLORS.length) | 0];
-                    this.skew = 0.3 + Math.random() * 0.7;
-                    this.alpha = 0.9;
-                }
-                update(t, step) {
-                    this.y += this.speedY * step;
-                    this.angle += this.angularSpeed * step;
-                    this.x += Math.sin(t * 0.001 + this.baseAngle) * this.swing * 0.6 * step;
-                    if (this.y > window.innerHeight + this.size * 1.2) this.reset(false);
-                }
-                draw(ctx) {
-                    ctx.save();
-                    ctx.globalAlpha = this.alpha;
-                    ctx.translate(this.x, this.y);
-                    ctx.rotate(this.angle);
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, this.size * 0.55, this.size, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.globalAlpha = this.alpha * 0.15;
-                    ctx.strokeStyle = "#000";
-                    ctx.beginPath();
-                    ctx.moveTo(0, -this.size);
-                    ctx.lineTo(0, this.size);
-                    ctx.stroke();
-                    ctx.restore();
-                }
+            layer.appendChild(fragment);
+            // The browser owns all per-frame motion; JavaScript only handles lifecycle changes.
+            function syncLeaves() {
+                layer.toggleAttribute('data-paused', document.hidden || motionPreference.matches);
             }
-            for (let i = 0; i < leafCount; i++) leaves.push(new Leaf());
-            addAnimation((t, step) => {
-                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                for (const leaf of leaves) {
-                    leaf.update(t, step);
-                    leaf.draw(ctx);
-                }
-            });
+            document.addEventListener('visibilitychange', syncLeaves);
+            motionPreference.addEventListener('change', syncLeaves);
+            syncLeaves();
         })();
         (function() {
             const fg = document.getElementById('fgcanvas');
