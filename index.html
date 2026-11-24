@@ -160,7 +160,7 @@
         .pub-badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--muted) }
         main, footer { position: relative; z-index: 1 }
         #bgcanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: block }
-        #fgcanvas { position: fixed; inset: 0; z-index: 3; pointer-events: none; display: block }
+        #fgcanvas { position: fixed; top: 0; left: 0; width: 160px; height: 160px; z-index: 3; pointer-events: none; display: block; will-change: transform }
         #leaves { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: block }
         body.use-custom-cursor { cursor: none }
         .cursor-ring {
@@ -228,62 +228,6 @@
             .cursor-ring { display: none !important }
             body { cursor: auto !important }
         }
-        body.splash-lock { overflow: hidden }
-        #splash-intro {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            display: grid;
-            place-items: center;
-            background: radial-gradient(1400px 900px at 20% 10%, rgba(15,118,110,.14), transparent 60%),
-                        radial-gradient(1400px 900px at 80% 90%, rgba(199,162,106,.12), transparent 60%),
-                        #0b1220;
-            color: #e5e7eb;
-            transition: opacity .9s ease, visibility .9s ease;
-        }
-        #splash-intro.hidden { opacity: 0; visibility: hidden; pointer-events: none }
-        #splash-layer, #wind-layer { position: absolute; inset: 0; display: block; pointer-events: none }
-        #splash-layer { z-index: 0 }
-        #wind-layer { z-index: 1 }
-        .splash-text { position: relative; z-index: 2; text-align: center; user-select: none; letter-spacing: .6px; padding: 0 16px }
-        .splash-title {
-            font-weight: 900;
-            font-size: clamp(26px, 6vw, 56px);
-            text-transform: uppercase;
-            font-family: "Playfair Display", "Source Sans 3", serif;
-            text-shadow: 0 0 8px rgba(15,118,110,.75), 0 0 18px rgba(199,162,106,.55);
-            filter: drop-shadow(0 4px 16px rgba(2,6,23,.45));
-            min-height: 1.4em;
-        }
-        .caret {
-            display: inline-block;
-            width: 0.8ch;
-            margin-left: 2px;
-            border-right: 2px solid #22d3ee;
-            filter: drop-shadow(0 0 8px rgba(34,211,238,.9));
-            animation: blink .9s steps(1, end) infinite;
-            vertical-align: -3px;
-        }
-        @keyframes blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
-        .splash-sub { margin-top: 10px; font-size: clamp(12px, 2.6vw, 16px); opacity: .75; font-family: "Source Sans 3", "PingFang SC", "Noto Sans CJK SC", "Microsoft Yahei", sans-serif }
-        #skip-btn {
-            position: fixed;
-            right: 18px;
-            bottom: 18px;
-            z-index: 3;
-            padding: 10px 14px;
-            border-radius: 999px;
-            font-weight: 600;
-            background: rgba(2,6,23,.6);
-            color: #e5e7eb;
-            border: 1px solid rgba(148,163,184,.35);
-            backdrop-filter: blur(6px) saturate(1.1);
-            box-shadow: 0 6px 18px rgba(0,0,0,.25);
-            cursor: pointer;
-            transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease;
-        }
-        #skip-btn:hover { transform: translateY(-1px); background: rgba(2,6,23,.72) }
-        #skip-btn:active { transform: translateY(0) }
         .hero-img {
             width: 150px;
             height: auto;
@@ -313,16 +257,6 @@
     </style>
 </head>
 <body>
-    <div id="splash-intro" role="dialog" aria-label="intro animation">
-        <canvas id="splash-layer"></canvas>
-        <canvas id="wind-layer"></canvas>
-        <div class="splash-text">
-            <div class="splash-title">
-                <span id="type-target"></span><span class="caret" aria-hidden="true"></span>
-            </div>
-        </div>
-        <button id="skip-btn" type="button" aria-label="skip intro">Skip</button>
-    </div>
     <canvas id="bgcanvas" aria-hidden="true"></canvas>
     <canvas id="fgcanvas" aria-hidden="true"></canvas>
     <canvas id="leaves" aria-hidden="true"></canvas>
@@ -362,7 +296,7 @@
                 <img src="https://toolnail.github.io/personal_photo_beijing.jpg" alt="cover" class="hero-img" />
                 <div>
                   <h1 class="hero-title">Hello, I am <span class="hero-name">Ruxin Wang</span></h1>
-                  <p class="hero-sub">Ph.D. student at Shanghai Jiao Tong University Global College</p>
+                  <p class="hero-sub">Ph.D. student at Shanghai Jiao Tong University</p>
                     <div class="wrap" style="margin-top: 14px">
                     <a class="btn" href="https://orcid.org/0009-0007-7156-2173" target="_blank" rel="noreferrer">
                         <img src="orcid.logo.icon.svg" alt="ORCID" style="width:16px; height:16px; vertical-align:middle; margin-right:6px;">
@@ -423,29 +357,43 @@
     <script>
         document.getElementById('y').textContent = new Date().getFullYear();
         function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
-        function setupCanvas(canvas) {
-            const ctx = canvas.getContext('2d');
-            function resize() {
-                const DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = Math.floor(rect.width * DPR);
-                canvas.height = Math.floor(rect.height * DPR);
-                ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        // Share one clock, and suspend decorative work while it cannot be seen.
+        const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const animations = [];
+        let animationFrame = null, previousTime = null, animationTime = 0;
+        function syncAnimations() {
+            if (document.hidden || motionPreference.matches) {
+                if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+                previousTime = null;
+            } else if (animationFrame === null && animations.length) {
+                animationFrame = requestAnimationFrame(tickAnimations);
             }
-            const ro = new ResizeObserver(resize);
-            ro.observe(canvas);
-            resize();
-            return ctx;
         }
+        function tickAnimations(now) {
+            const elapsed = previousTime === null ? 0 : Math.min(now - previousTime, 50);
+            previousTime = now;
+            animationTime += elapsed;
+            for (const draw of animations) draw(animationTime, elapsed / (1000 / 60));
+            animationFrame = null;
+            syncAnimations();
+        }
+        function addAnimation(draw) {
+            animations.push(draw);
+            syncAnimations();
+        }
+        document.addEventListener('visibilitychange', syncAnimations);
+        motionPreference.addEventListener('change', syncAnimations);
         (function() {
             const canvas = document.getElementById("leaves");
             const ctx = canvas.getContext("2d");
-            let W, H, DPR;
-            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let DPR;
             function resize() {
-                DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-                W = canvas.width = Math.floor(window.innerWidth * DPR);
-                H = canvas.height = Math.floor(window.innerHeight * DPR);
+                // Limit the decorative canvas pixel budget on large, high-DPI screens.
+                DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2,
+                    Math.sqrt(2500000 / (window.innerWidth * window.innerHeight))));
+                canvas.width = Math.floor(window.innerWidth * DPR);
+                canvas.height = Math.floor(window.innerHeight * DPR);
                 canvas.style.width = window.innerWidth + "px";
                 canvas.style.height = window.innerHeight + "px";
                 ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -455,7 +403,7 @@
             const COLORS = [css('--leaf1'), css('--leaf2'), css('--leaf3'), css('--leaf4'), css('--leaf5')];
             const leaves = [];
             const BASE_COUNT = 36;
-            const DENSITY = Math.max(1, Math.min(1.0, window.innerWidth / 1200));
+            const DENSITY = Math.max(0.5, Math.min(1, window.innerWidth / 1200));
             const leafCount = Math.floor(BASE_COUNT * DENSITY);
             class Leaf {
                 constructor() { this.reset(true); }
@@ -472,10 +420,10 @@
                     this.skew = 0.3 + Math.random() * 0.7;
                     this.alpha = 0.9;
                 }
-                update(t) {
-                    this.y += this.speedY;
-                    this.angle += this.angularSpeed;
-                    this.x += Math.sin(t * 0.001 + this.baseAngle) * this.swing * 0.6;
+                update(t, step) {
+                    this.y += this.speedY * step;
+                    this.angle += this.angularSpeed * step;
+                    this.x += Math.sin(t * 0.001 + this.baseAngle) * this.swing * 0.6 * step;
                     if (this.y > window.innerHeight + this.size * 1.2) this.reset(false);
                 }
                 draw(ctx) {
@@ -497,32 +445,22 @@
                 }
             }
             for (let i = 0; i < leafCount; i++) leaves.push(new Leaf());
-            let rafId = null;
-            function animate(t) {
+            addAnimation((t, step) => {
                 ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
                 for (const leaf of leaves) {
-                    leaf.update(t || 0);
+                    leaf.update(t, step);
                     leaf.draw(ctx);
                 }
-                rafId = requestAnimationFrame(animate);
-            }
-            if (!reduceMotion) {
-                animate(0);
-                document.addEventListener("visibilitychange", () => {
-                    if (document.hidden) { if (rafId) cancelAnimationFrame(rafId); rafId = null; }
-                    else if (!rafId) { rafId = requestAnimationFrame(animate); }
-                });
-            }
+            });
         })();
         (function() {
             const fg = document.getElementById('fgcanvas');
             const ctx = fg.getContext('2d');
+            const spriteSize = 160;
             function resize() {
                 const DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-                fg.width = Math.floor(window.innerWidth * DPR);
-                fg.height = Math.floor(window.innerHeight * DPR);
-                fg.style.width = window.innerWidth + 'px';
-                fg.style.height = window.innerHeight + 'px';
+                fg.width = Math.floor(spriteSize * DPR);
+                fg.height = Math.floor(spriteSize * DPR);
                 ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
             }
             window.addEventListener('resize', resize, { passive: true });
@@ -544,7 +482,7 @@
             };
             let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
             window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; }, { passive: true });
-            function updateCat(now) {
+            function updateCat(now, step) {
                 const dx = mouseX - CAT.x, dy = mouseY - CAT.y;
                 const dist = Math.hypot(dx, dy) || 1;
                 if (dist <= CAT.cuddleRadius) { CAT.state = 'cuddle'; CAT.cuddleUntil = now + 650; }
@@ -556,12 +494,13 @@
                 const slow = Math.min(1, d / 120);
                 const ax = (ddx / d) * CAT.accel * slow;
                 const ay = (ddy / d) * CAT.accel * slow;
-                if (CAT.state === 'cuddle') { CAT.vx = (CAT.vx + ax) * 0.85; CAT.vy = (CAT.vy + ay) * 0.85; }
-                else { CAT.vx = (CAT.vx + ax) * CAT.friction; CAT.vy = (CAT.vy + ay) * CAT.friction; }
+                const damping = Math.pow(CAT.state === 'cuddle' ? 0.85 : CAT.friction, step);
+                CAT.vx = (CAT.vx + ax * step) * damping;
+                CAT.vy = (CAT.vy + ay * step) * damping;
                 const sp = Math.hypot(CAT.vx, CAT.vy);
                 const maxV = (CAT.state === 'cuddle') ? 1.2 : CAT.maxSpeed;
                 if (sp > maxV) { CAT.vx = CAT.vx / sp * maxV; CAT.vy = CAT.vy / sp * maxV; }
-                CAT.x += CAT.vx; CAT.y += CAT.vy;
+                CAT.x += CAT.vx * step; CAT.y += CAT.vy * step;
                 CAT.angle = Math.atan2(CAT.vy, CAT.vx);
                 const pad = CAT.size * 0.8;
                 if (CAT.x < pad) { CAT.x = pad; CAT.vx = Math.abs(CAT.vx) * 0.6; }
@@ -572,7 +511,7 @@
             function drawCat(now) {
                 const s = CAT.size;
                 ctx.save();
-                ctx.translate(CAT.x, CAT.y);
+                ctx.translate(spriteSize / 2, spriteSize / 2);
                 let headNod = 0, headShiftX = 0;
                 if (CAT.state === 'cuddle') {
                     headNod = Math.sin(now * 0.02) * (s * 0.03);
@@ -629,26 +568,34 @@
                 ctx.restore();
                 ctx.restore();
             }
-            function applyMergeEffects() {
-                const R = 90;
-                for (const el of mergeEls) {
+            let lastMergeCheck = -Infinity;
+            const nearElements = new Set();
+            function applyMergeEffects(now) {
+                if (now - lastMergeCheck < 100) return;
+                lastMergeCheck = now;
+                // Finish every geometry read before changing any styles.
+                const nearby = mergeEls.map(el => {
                     const rect = el.getBoundingClientRect();
-                    const cx = rect.left + rect.width / 2;
-                    const cy = rect.top + rect.height / 2;
-                    const dx = cx - CAT.x, dy = cy - CAT.y;
-                    const dist = Math.hypot(dx, dy);
-                    if (dist < R) el.classList.add('cat-near');
-                    else el.classList.remove('cat-near');
-                }
+                    const dx = rect.left + rect.width / 2 - CAT.x;
+                    const dy = rect.top + rect.height / 2 - CAT.y;
+                    return dx * dx + dy * dy < 90 * 90;
+                });
+                mergeEls.forEach((el, i) => {
+                    if (nearby[i] === nearElements.has(el)) return;
+                    el.classList.toggle('cat-near', nearby[i]);
+                    if (nearby[i]) nearElements.add(el);
+                    else nearElements.delete(el);
+                });
             }
-            function animate(t) {
-                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                updateCat(t || 0);
-                drawCat(t || 0);
-                applyMergeEffects();
-                requestAnimationFrame(animate);
-            }
-            animate(0);
+            addAnimation((t, step) => {
+                // Small steps keep steering stable after a delayed frame.
+                const steps = Math.max(1, Math.ceil(step));
+                for (let i = 0; i < steps; i++) updateCat(t, step / steps);
+                applyMergeEffects(t);
+                ctx.clearRect(0, 0, spriteSize, spriteSize);
+                drawCat(t);
+                fg.style.transform = `translate3d(${CAT.x - spriteSize / 2}px, ${CAT.y - spriteSize / 2}px, 0)`;
+            });
         })();
         (function() {
             const ring = document.querySelector('.cursor-ring');
@@ -663,6 +610,7 @@
                 cursorFrame = 0;
             }
             window.addEventListener('pointermove', e => {
+                if (motionPreference.matches) return;
                 x = e.clientX;
                 y = e.clientY;
                 if (!cursorFrame) cursorFrame = requestAnimationFrame(renderCursor);
@@ -683,178 +631,6 @@
             if (openBtn && drawer) { openBtn.addEventListener('click', () => { drawer.style.display = 'block'; }); }
             if (closeBtn && drawer) { closeBtn.addEventListener('click', () => { drawer.style.display = 'none'; }); }
             drawer?.addEventListener('click', (e) => { if (e.target === drawer) drawer.style.display = 'none'; });
-        })();
-        (function() {
-            const SPLASH_DURATION = 10000;
-            const TYPE_DELAY_MS = 1500;
-            const TYPE_SPEED_MS = 38;
-            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            const duration = prefersReduced ? 1200 : SPLASH_DURATION;
-            const typeDelay = prefersReduced ? 300 : TYPE_DELAY_MS;
-            const typeSpeed = prefersReduced ? 10 : TYPE_SPEED_MS;
-            const splash = document.getElementById('splash-intro');
-            const jungle = document.getElementById('splash-layer');
-            const wind = document.getElementById('wind-layer');
-            const typeEl = document.getElementById('type-target');
-            const skipBtn = document.getElementById('skip-btn');
-            if (!splash || !jungle || !wind || !typeEl || !skipBtn) return;
-            document.body.classList.add('splash-lock');
-            const jctx = jungle.getContext('2d');
-            const wctx = wind.getContext('2d');
-            function resize() {
-                const DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-                for (const c of [jungle, wind]) {
-                    c.width = Math.floor(window.innerWidth * DPR);
-                    c.height = Math.floor(window.innerHeight * DPR);
-                    c.style.width = window.innerWidth + 'px';
-                    c.style.height = window.innerHeight + 'px';
-                }
-                jctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-                wctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-            }
-            window.addEventListener('resize', resize, { passive: true }); resize();
-            const leaves = [];
-            const vines = [];
-            const COLORS = [css('--leaf1'), css('--leaf2'), css('--leaf3'), css('--leaf4'), css('--leaf5')];
-            function rand(a, b) { return a + Math.random() * (b - a); }
-            function spawnVines() {
-                vines.length = 0;
-                const count = Math.round(Math.max(6, Math.min(18, window.innerWidth / 120)));
-                for (let i = 0; i < count; i++) {
-                    vines.push({
-                        x: rand(-80, window.innerWidth + 80),
-                        y: rand(-60, 60),
-                        len: rand(window.innerHeight * 0.5, window.innerHeight * 0.9),
-                        wiggle: rand(0.6, 1.2),
-                        thick: rand(2, 4),
-                        hue: rand(90, 150)
-                    });
-                }
-            }
-            function spawnLeaves() {
-                leaves.length = 0;
-                const density = Math.round(Math.max(120, Math.min(260, window.innerWidth * window.innerHeight / 40_000)));
-                for (let i = 0; i < density; i++) {
-                    leaves.push({
-                        x: Math.random() * window.innerWidth,
-                        y: Math.random() * window.innerHeight,
-                        r: rand(6, 18),
-                        vx: rand(-0.2, 0.2),
-                        vy: rand(0.1, 0.6),
-                        sway: rand(0.2, 0.8),
-                        a: rand(0, Math.PI * 2),
-                        rot: rand(-0.02, 0.02),
-                        c: COLORS[(Math.random() * COLORS.length) | 0],
-                        alpha: rand(0.6, 0.95)
-                    });
-                }
-            }
-            spawnVines(); spawnLeaves();
-            let windPower = 0; let gustTarget = 0;
-            const GUST_START = Math.max(2000, SPLASH_DURATION * 0.55);
-            const GUST_END = Math.min(SPLASH_DURATION - 1800, GUST_START + 1800);
-            function scheduleGust(t) {
-                if (t > GUST_START && t < GUST_END) { gustTarget = 1; }
-                else if (t >= GUST_END) { gustTarget = 0; }
-                windPower += (gustTarget - windPower) * 0.03;
-            }
-            function drawVines(t) {
-                jctx.save();
-                for (const v of vines) {
-                    jctx.strokeStyle = `hsl(${v.hue} 40% 20% / 0.85)`;
-                    jctx.lineWidth = v.thick;
-                    jctx.beginPath();
-                    jctx.moveTo(v.x, v.y);
-                    const seg = 10;
-                    for (let i = 1; i <= seg; i++) {
-                        const p = i / seg;
-                        const sway = Math.sin(t * 0.001 + p * 8 + v.x * 0.01) * v.wiggle * (1 + windPower * 1.6);
-                        const xx = v.x + sway * 30 * p + windPower * 20 * p;
-                        const yy = v.y + v.len * p;
-                        jctx.lineTo(xx, yy);
-                    }
-                    jctx.stroke();
-                }
-                jctx.restore();
-            }
-            function drawLeaf(l) {
-                jctx.save();
-                jctx.globalAlpha = l.alpha;
-                jctx.translate(l.x, l.y);
-                jctx.rotate(l.a);
-                jctx.fillStyle = l.c;
-                jctx.beginPath();
-                jctx.ellipse(0, 0, l.r * 0.6, l.r, 0, 0, Math.PI * 2);
-                jctx.fill();
-                jctx.restore();
-            }
-            function updateLeaves() {
-                for (const L of leaves) {
-                    L.vx += windPower * 0.35 + Math.sin(L.a * 3) * 0.02;
-                    L.vy += Math.sin(L.a * 2) * 0.005;
-                    L.x += L.vx; L.y += L.vy;
-                    L.a += L.rot + windPower * 0.02;
-                    if (L.x > window.innerWidth + 40) L.x = -40;
-                    if (L.y > window.innerHeight + 20) { L.y = -20; L.x = rand(-20, window.innerWidth + 20); }
-                }
-            }
-            function drawWindTrails() {
-                const lines = Math.round(6 + windPower * 22);
-                wctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                wctx.save();
-                wctx.globalAlpha = 0.15 + windPower * 0.25;
-                wctx.lineWidth = 2 + windPower * 2;
-                wctx.strokeStyle = `rgba(125,211,252,${0.35 + windPower * 0.4})`;
-                for (let i = 0; i < lines; i++) {
-                    const y = Math.random() * window.innerHeight;
-                    const len = 80 + Math.random() * 240 * (1 + windPower);
-                    wctx.beginPath();
-                    wctx.moveTo(-50, y + Math.sin(y * 0.02 + performance.now() * 0.002) * 6);
-                    wctx.quadraticCurveTo(len * 0.3, y - 10, len, y + 5);
-                    wctx.stroke();
-                }
-                wctx.restore();
-            }
-            let start = performance.now();
-            function loop(now) {
-                const t = now - start;
-                scheduleGust(t);
-                jctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-                drawVines(now);
-                updateLeaves();
-                for (const L of leaves) drawLeaf(L);
-                drawWindTrails();
-                if (!document.getElementById('splash-intro').classList.contains('hidden')) requestAnimationFrame(loop);
-            }
-            requestAnimationFrame(loop);
-            const FULL_TEXT = "Welcome to WangRuxin personal page";
-            function typeWriter(text, el, startDelay = 0, speed = 36) {
-                el.textContent = "";
-                const beginAt = performance.now() + startDelay;
-                let idx = 0;
-                function step(now) {
-                    if (now < beginAt) { requestAnimationFrame(step); return; }
-                    if (idx <= text.length) {
-                        el.textContent = text.slice(0, idx);
-                        idx++;
-                        setTimeout(() => requestAnimationFrame(step), speed);
-                    }
-                }
-                requestAnimationFrame(step);
-            }
-            setTimeout(() => typeWriter(FULL_TEXT, document.getElementById('type-target'), 0, 38), 1500);
-            function hideSplash() {
-                const splash = document.getElementById('splash-intro');
-                if (splash.classList.contains('hidden')) return;
-                splash.classList.add('hidden');
-                document.body.classList.remove('splash-lock');
-                setTimeout(() => splash.remove(), 900);
-            }
-            const timer = setTimeout(hideSplash, 10000);
-            document.getElementById('skip-btn').addEventListener('click', () => {
-                clearTimeout(timer);
-                hideSplash();
-            }, { once: true });
         })();
     </script>
 </body>
