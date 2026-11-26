@@ -310,8 +310,7 @@
         <section id="about">
             <div class="section-title"><h2>About Me</h2><div class="line"></div></div>
             <div class="card">
-                <p>I am currently pursuing a Ph.D. degree at Shanghai Jiao Tong University, Global College. Prior to that, I received the B.Eng. degree in Telecommunication Engineering from Xidian University in 2025.</p>
-                <p>My research interests primarily focus on wireless sensing and reconstruction.</p>
+                <p>I am currently pursuing a Ph.D. degree at Shanghai Jiao Tong University, Global College. Prior to that, I received the B.Eng. degree in Telecommunication Engineering from Xidian University in 2025. My research interests primarily focus on wireless sensing and reconstruction.</p>
             </div>
         </section>
         <section id="education" aria-labelledby="education-title">
@@ -534,7 +533,24 @@
                     ctx.beginPath(); ctx.moveTo(-s * 0.05 + i * s * 0.15, -s * 0.25); ctx.lineTo(-s * 0.15 + i * s * 0.15, -s * 0.05); ctx.stroke();
                 }
                 ctx.save();
-                ctx.translate(s * 0.55, -s * 0.05);
+                ctx.translate(s * 0.55 + headShiftX, -s * 0.05 + headNod);
+                // Draw pointed ears behind the face, with soft pink inner ears.
+                for (const side of [-1, 1]) {
+                    ctx.fillStyle = orangeDeep;
+                    ctx.beginPath();
+                    ctx.moveTo(side * s * 0.06, -s * 0.21);
+                    ctx.lineTo(side * s * 0.25, -s * 0.52);
+                    ctx.lineTo(side * s * 0.33, -s * 0.12);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = earPink;
+                    ctx.beginPath();
+                    ctx.moveTo(side * s * 0.14, -s * 0.24);
+                    ctx.lineTo(side * s * 0.24, -s * 0.42);
+                    ctx.lineTo(side * s * 0.28, -s * 0.20);
+                    ctx.closePath();
+                    ctx.fill();
+                }
                 ctx.fillStyle = orange;
                 ctx.beginPath();
                 ctx.ellipse(0, 0, s * 0.36, s * 0.3, 0, 0, Math.PI * 2);
@@ -549,6 +565,18 @@
                     ctx.ellipse(-s * 0.04, -s * 0.05, s * 0.04, s * 0.05, 0, 0, Math.PI * 2);
                     ctx.ellipse(s * 0.10, -s * 0.05, s * 0.04, s * 0.05, 0, 0, Math.PI * 2);
                     ctx.fill();
+                }
+                // Three fine whiskers fan out from each cheek.
+                ctx.strokeStyle = '#704a30';
+                ctx.lineWidth = 1.4;
+                ctx.lineCap = 'round';
+                for (const side of [-1, 1]) {
+                    for (let i = -1; i <= 1; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(s * 0.03 + side * s * 0.13, s * (0.08 + i * 0.025));
+                        ctx.lineTo(s * 0.03 + side * s * 0.48, s * (0.08 + i * 0.12));
+                        ctx.stroke();
+                    }
                 }
                 ctx.fillStyle = '#ef4444';
                 ctx.beginPath(); ctx.ellipse(s * 0.03, s * 0.02, s * 0.02, s * 0.015, 0, 0, Math.PI * 2); ctx.fill();
