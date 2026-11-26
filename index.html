@@ -125,6 +125,17 @@
         .list { list-style: none; margin: 0; padding: 0 }
         .list li { padding: 14px 0; border-bottom: 1px dashed var(--muted) }
         .list li:last-child { border-bottom: none }
+        .education-item { display: flex; align-items: center; gap: 24px; padding: 20px 0 }
+        .education-item + .education-item { border-top: 1px dashed var(--muted) }
+        .education-logo { width: 96px; height: 96px; flex: 0 0 96px; object-fit: contain; padding: 6px; background: #fff; border-radius: 12px }
+        .education-info { min-width: 0 }
+        .education-info h3 { margin: 0 0 4px; font-size: 1.125rem; line-height: 1.4 }
+        .education-info p { margin: 2px 0 }
+        .education-date { color: var(--sub); font-size: 0.875rem }
+        @media (max-width: 540px) {
+            .education-item { align-items: flex-start; gap: 16px }
+            .education-logo { width: 72px; height: 72px; flex-basis: 72px }
+        }
         .footer { padding: 40px 0; border-top: 1px solid var(--muted); font-size: 14px; color: var(--sub) }
         .pill { display: inline-flex; align-items: center; gap: 8px; background: var(--muted); padding: 6px 10px; border-radius: 999px }
         .right { margin-left: auto }
@@ -252,6 +263,7 @@
                 </div>
                 <div class="navlinks">
                     <a href="#about">About</a>
+                    <a href="#education">Education</a>
                     <a href="#publications">Publications</a>
                     <a href="#contact">Contact</a>
                 </div>
@@ -266,6 +278,7 @@
                 <button id="close" class="btn">Close</button>
             </div>
             <a href="#about">About</a>
+            <a href="#education">Education</a>
             <a href="#publications">Publications</a>
             <a href="#contact">Contact</a>
         </div>
@@ -299,6 +312,29 @@
             <div class="section-title"><h2>About Me</h2><div class="line"></div></div>
             <div class="card">
                 <p>I am currently pursuing a Ph.D. degree at <a href="https://gc.sjtu.edu.cn/" target="_blank">Shanghai Jiao Tong University Global College</a>. Prior to that, I received the B.Eng. degree in Telecommunication Engineering from <a href="https://www.xidian.edu.cn/" target="_blank">Xidian University</a> in 2025.</p>
+            </div>
+        </section>
+        <section id="education" aria-labelledby="education-title">
+            <div class="section-title"><h2 id="education-title">Education</h2><div class="line"></div></div>
+            <div class="card">
+                <article class="education-item">
+                    <!-- Official emblem: https://vi.sjtu.edu.cn/index.php/articles/bulletin/13 -->
+                    <img class="education-logo" src="sjtu-logo.png" alt="Shanghai Jiao Tong University emblem" width="96" height="96" loading="lazy" decoding="async" />
+                    <div class="education-info">
+                        <h3><a href="https://www.sjtu.edu.cn/" target="_blank" rel="noreferrer">Shanghai Jiao Tong University</a></h3>
+                        <p>Ph.D. student, Global College</p>
+                        <p class="education-date">Currently enrolled</p>
+                    </div>
+                </article>
+                <article class="education-item">
+                    <!-- Official emblem: https://xcb.xidian.edu.cn/info/1008/1094.htm -->
+                    <img class="education-logo" src="xidian-logo.jpg" alt="Xidian University emblem" width="96" height="96" loading="lazy" decoding="async" />
+                    <div class="education-info">
+                        <h3><a href="https://www.xidian.edu.cn/" target="_blank" rel="noreferrer">Xidian University</a></h3>
+                        <p>B.Eng. in Telecommunication Engineering</p>
+                        <p class="education-date">Graduated in <time datetime="2025">2025</time></p>
+                    </div>
+                </article>
             </div>
         </section>
         <section id="publications">
