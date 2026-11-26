@@ -461,6 +461,8 @@
                 state: 'chase',
                 cuddleRadius: 64,
                 cuddleUntil: 0,
+                whiskerX: 0, whiskerY: 0,
+                whiskerVX: 0, whiskerVY: 0,
             };
             let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
             window.addEventListener('pointermove', (e) => {
@@ -469,6 +471,7 @@
                 mouseY = e.clientY;
             }, { passive: true });
             function updateCat(now, step) {
+                const previousVx = CAT.vx, previousVy = CAT.vy;
                 const dx = mouseX - CAT.x, dy = mouseY - CAT.y;
                 const dist = Math.hypot(dx, dy) || 1;
                 if (dist <= CAT.cuddleRadius) { CAT.state = 'cuddle'; CAT.cuddleUntil = now + 650; }
@@ -493,6 +496,24 @@
                 if (CAT.x > window.innerWidth - pad) { CAT.x = window.innerWidth - pad; CAT.vx = -Math.abs(CAT.vx) * 0.6; }
                 if (CAT.y < pad) { CAT.y = pad; CAT.vy = Math.abs(CAT.vy) * 0.6; }
                 if (CAT.y > window.innerHeight - pad) { CAT.y = window.innerHeight - pad; CAT.vy = -Math.abs(CAT.vy) * 0.6; }
+                updateWhiskers(now, step, previousVx, previousVy);
+            }
+            function updateWhiskers(now, step, previousVx, previousVy) {
+                if (step <= 0) return;
+                const speed = Math.min(1, Math.hypot(CAT.vx, CAT.vy) / CAT.maxSpeed);
+                const ax = (CAT.vx - previousVx) / step;
+                const ay = (CAT.vy - previousVy) / step;
+                const forward = ax * Math.cos(CAT.angle) + ay * Math.sin(CAT.angle);
+                const sideways = -ax * Math.sin(CAT.angle) + ay * Math.cos(CAT.angle);
+                const clampBend = value => Math.max(-2.2, Math.min(2.2, value));
+                // Inertia bends the tips; a damped spring lets them settle after stopping.
+                const targetX = clampBend(-1.8 * speed - 2 * forward);
+                const targetY = clampBend(-2 * sideways + Math.sin(now * 0.012) * speed * 1.1);
+                const damping = Math.exp(-0.28 * step);
+                CAT.whiskerVX = (CAT.whiskerVX + (targetX - CAT.whiskerX) * 0.12 * step) * damping;
+                CAT.whiskerVY = (CAT.whiskerVY + (targetY - CAT.whiskerY) * 0.12 * step) * damping;
+                CAT.whiskerX += CAT.whiskerVX * step;
+                CAT.whiskerY += CAT.whiskerVY * step;
             }
             function drawCat(now) {
                 const s = CAT.size;
@@ -566,15 +587,25 @@
                     ctx.ellipse(s * 0.10, -s * 0.05, s * 0.04, s * 0.05, 0, 0, Math.PI * 2);
                     ctx.fill();
                 }
-                // Three fine whiskers fan out from each cheek.
-                ctx.strokeStyle = '#704a30';
-                ctx.lineWidth = 1.4;
+                // Pale, gently curved whiskers stay rooted to the cheeks.
+                ctx.strokeStyle = 'rgba(232, 206, 156, 0.9)';
+                ctx.lineWidth = 0.9;
                 ctx.lineCap = 'round';
                 for (const side of [-1, 1]) {
                     for (let i = -1; i <= 1; i++) {
+                        const rootX = s * 0.03 + side * s * 0.17;
+                        const rootY = s * (0.08 + i * 0.025);
+                        const flex = 1 + i * 0.12;
+                        const bendX = CAT.whiskerX * flex;
+                        const bendY = CAT.whiskerY * flex;
                         ctx.beginPath();
-                        ctx.moveTo(s * 0.03 + side * s * 0.13, s * (0.08 + i * 0.025));
-                        ctx.lineTo(s * 0.03 + side * s * 0.48, s * (0.08 + i * 0.12));
+                        ctx.moveTo(rootX, rootY);
+                        ctx.quadraticCurveTo(
+                            rootX + side * s * 0.13 + bendX * 0.3,
+                            rootY + i * s * 0.025 + bendY * 0.3,
+                            s * 0.03 + side * s * 0.43 + bendX,
+                            s * (0.08 + i * 0.10) + bendY
+                        );
                         ctx.stroke();
                     }
                 }
